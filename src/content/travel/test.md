@@ -1,0 +1,16 @@
+---
+title: "Test Post"
+slug: "test-post"
+country: "Testland"
+region: "Test Region"
+flag: "🏳️"
+date: 2025-01-01
+tier: "free"
+summary: "This is a test post."
+tags: ["test"]
+order: 1
+---
+
+## Hello
+
+This is a test.

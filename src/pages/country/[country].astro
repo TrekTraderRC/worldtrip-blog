@@ -1,0 +1,307 @@
+---
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('travel');
+
+  const countriesMap = new Map();
+
+  for (const post of posts) {
+    const slug = post.data.country.toLowerCase().replaceAll(' ', '-');
+
+    if (!countriesMap.has(slug)) {
+      countriesMap.set(slug, {
+        params: { country: slug },
+        props: {
+          countryName: post.data.country,
+          flag: post.data.flag,
+          region: post.data.region,
+        },
+      });
+    }
+  }
+
+  return Array.from(countriesMap.values());
+}
+
+const { country } = Astro.params;
+const { countryName, flag, region } = Astro.props;
+
+const allPosts = await getCollection('travel');
+
+const countryPosts = allPosts
+  .filter(
+    (post) => post.data.country.toLowerCase().replaceAll(' ', '-') === country
+  )
+  .sort((a, b) => a.data.order - b.data.order);
+
+const renderedPosts = await Promise.all(
+  countryPosts.map(async (post) => {
+    const rendered = await render(post);
+    return {
+      post,
+      Content: rendered.Content,
+    };
+  })
+);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{countryName} - World Trip Blog</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f7f7f7;
+        color: #222;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 50px 24px 80px;
+      }
+
+      .topbar {
+        margin-bottom: 30px;
+      }
+
+      .back-link {
+        text-decoration: none;
+        color: #444;
+        font-size: 14px;
+      }
+
+      .hero {
+        margin-bottom: 30px;
+      }
+
+      .hero h1 {
+        font-size: 48px;
+        margin: 0 0 10px;
+      }
+
+      .hero p {
+        margin: 0;
+        color: #666;
+        font-size: 18px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 260px;
+        gap: 28px;
+        align-items: start;
+      }
+
+      .main-column {
+        display: grid;
+        gap: 20px;
+      }
+
+      .post-card {
+        background: white;
+        border-radius: 18px;
+        padding: 22px 24px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      }
+
+      .post-summary {
+        cursor: pointer;
+        list-style: none;
+      }
+
+      .post-summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .post-title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .post-title {
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .badge.free {
+        background: #e8f7e8;
+        color: #246b2a;
+      }
+
+      .badge.paid {
+        background: #f7eadf;
+        color: #8a4b08;
+      }
+
+      .post-meta {
+        color: #666;
+        font-size: 14px;
+        margin-top: 8px;
+      }
+
+      .post-excerpt {
+        margin-top: 14px;
+        color: #333;
+        line-height: 1.7;
+      }
+
+      .post-body {
+        margin-top: 22px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        line-height: 1.8;
+      }
+
+      .post-body img {
+        max-width: 100%;
+        border-radius: 12px;
+        margin: 16px 0;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 24px;
+        background: white;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      }
+
+      .sidebar h3 {
+        margin-top: 0;
+        margin-bottom: 14px;
+        font-size: 20px;
+      }
+
+      .sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      .sidebar a {
+        text-decoration: none;
+        color: #333;
+        font-size: 15px;
+      }
+
+      .sidebar a:hover {
+        color: #000;
+      }
+
+      .locked-box {
+        margin-top: 16px;
+        padding: 16px 18px;
+        border-radius: 14px;
+        background: #faf4ec;
+        border: 1px solid #f0dcc3;
+      }
+
+      .locked-box strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .locked-box a {
+        display: inline-block;
+        margin-top: 10px;
+        text-decoration: none;
+        color: #8a4b08;
+        font-weight: bold;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="topbar">
+        <a class="back-link" href="/">← Back to home</a>
+      </div>
+
+      <section class="hero">
+        <h1>{flag} {countryName}</h1>
+        <p>{region} · {countryPosts.length} travel notes</p>
+      </section>
+
+      <div class="layout">
+        <main class="main-column">
+          {renderedPosts.map(({ post, Content }) => (
+            <details class="post-card" id={post.data.slug}>
+              <summary class="post-summary">
+                <div class="post-title-row">
+                  <div class="post-title">{post.data.title}</div>
+                  <span class={`badge ${post.data.tier}`}>
+                    {post.data.tier.toUpperCase()}
+                  </span>
+                </div>
+
+                <div class="post-meta">
+                  {post.data.flag} {post.data.country} · {post.data.date.toLocaleDateString()}
+                </div>
+
+                <div class="post-excerpt">
+                  {post.data.summary}
+                </div>
+              </summary>
+
+              {post.data.tier === 'free' ? (
+                <div class="post-body">
+                  <Content />
+                </div>
+              ) : (
+                <div class="post-body">
+                  <p>{post.data.summary}</p>
+
+                  <div class="locked-box">
+                    <strong>Members-only content</strong>
+                    This travel note is reserved for paid subscribers.
+                    Later we can connect this area to your subscription system.
+                    <br />
+                    <a href="/pricing">Subscribe to unlock →</a>
+                  </div>
+                </div>
+              )}
+            </details>
+          ))}
+        </main>
+
+        <aside class="sidebar">
+          <h3>In this country</h3>
+          <ul>
+            {countryPosts.map((post) => (
+              <li>
+                <a href={`#${post.data.slug}`}>{post.data.title}</a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </body>
+</html>

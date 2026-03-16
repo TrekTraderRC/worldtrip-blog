@@ -1,0 +1,199 @@
+---
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('travel');
+console.log('ALL POSTS:', allPosts);
+
+const posts = allPosts.sort((a, b) => {
+  return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+});
+
+const latestPosts = posts.slice(0, 6);
+
+const countriesMap = new Map();
+
+for (const post of posts) {
+  const key = post.data.country;
+  if (!countriesMap.has(key)) {
+    countriesMap.set(key, {
+      country: post.data.country,
+      flag: post.data.flag,
+      region: post.data.region,
+    });
+  }
+}
+
+const countries = Array.from(countriesMap.values());
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>World Trip Blog</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f7f7f7;
+        color: #222;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 60px 24px;
+      }
+
+      .hero {
+        padding: 80px 0 40px;
+      }
+
+      h1 {
+        font-size: 52px;
+        margin-bottom: 16px;
+      }
+
+      h2 {
+        font-size: 30px;
+        margin-bottom: 18px;
+      }
+
+      p {
+        font-size: 18px;
+        line-height: 1.7;
+      }
+
+      .card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        margin-top: 32px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      }
+
+      .meta {
+        color: #666;
+        font-size: 15px;
+        margin-top: 8px;
+      }
+
+      .post-list {
+        display: grid;
+        gap: 16px;
+        margin-top: 20px;
+      }
+
+      .post-item {
+        background: #fff;
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+      }
+
+      .post-title {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-left: 10px;
+        vertical-align: middle;
+      }
+
+      .badge.free {
+        background: #e8f7e8;
+        color: #246b2a;
+      }
+
+      .badge.paid {
+        background: #f7eadf;
+        color: #8a4b08;
+      }
+
+      .country-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .country-pill {
+		background: white;
+		border-radius: 999px;
+		padding: 10px 16px;
+		box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+		font-size: 15px;
+		text-decoration: none;
+		color: #222;
+		display: inline-block;
+      }
+
+	  .country-pill:hover {
+		transform: translateY(-1px);
+	  }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section class="hero">
+        <h1>World Trip Blog</h1>
+        <p>
+          Travel writing, memory, place, and time.
+          Some stories are open to everyone. Some are reserved for members.
+        </p>
+        <p class="meta">
+          {posts.length} posts · {countries.length} countries
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Site intro</h2>
+        <p>
+          This will become a lightweight travel writing website with free and paid content,
+          country navigation, and long-form travel notes.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Countries</h2>
+        <div class="country-list">
+		  {countries.map((item) => (
+		    <a
+			  class="country-pill"
+			  href={`/country/${item.country.toLowerCase().replaceAll(' ', '-')}`}
+			>
+			  {item.flag} {item.country}
+			</a>
+		  ))}
+		</div>
+      </section>
+
+      <section class="card">
+        <h2>Latest travel notes</h2>
+        <div class="post-list">
+          {latestPosts.map((post) => (
+            <article class="post-item">
+              <div class="post-title">
+                {post.data.title}
+                <span class={`badge ${post.data.tier}`}>
+                  {post.data.tier.toUpperCase()}
+                </span>
+              </div>
+              <div class="meta">
+                {post.data.flag} {post.data.country} · {post.data.region}
+              </div>
+              <p>{post.data.summary}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
