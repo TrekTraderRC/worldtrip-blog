@@ -1,31 +1,11 @@
 ---
 import { getCollection, render } from 'astro:content';
+import 'flag-icons/css/flag-icons.min.css';
+import ThemeToggle from '../../components/ThemeToggle.astro';
 
-export async function getStaticPaths() {
-  const posts = await getCollection('travel');
-
-  const countriesMap = new Map();
-
-  for (const post of posts) {
-    const slug = post.data.country.toLowerCase().replaceAll(' ', '-');
-
-    if (!countriesMap.has(slug)) {
-      countriesMap.set(slug, {
-        params: { country: slug },
-        props: {
-          countryName: post.data.country,
-          flag: post.data.flag,
-          region: post.data.region,
-        },
-      });
-    }
-  }
-
-  return Array.from(countriesMap.values());
-}
+export const prerender = false;
 
 const { country } = Astro.params;
-const { countryName, flag, region } = Astro.props;
 
 const allPosts = await getCollection('travel');
 
@@ -34,6 +14,17 @@ const countryPosts = allPosts
     (post) => post.data.country.toLowerCase().replaceAll(' ', '-') === country
   )
   .sort((a, b) => a.data.order - b.data.order);
+
+if (countryPosts.length === 0) {
+  return new Response('Not found', { status: 404 });
+}
+
+const countryName = countryPosts[0].data.country;
+const countryCode = countryPosts[0].data.countryCode;
+const region = countryPosts[0].data.region;
+
+const currentUser = Astro.locals.user;
+const hasPaidAccess = Astro.locals.hasPaidAccess;
 
 const renderedPosts = await Promise.all(
   countryPosts.map(async (post) => {
@@ -44,56 +35,228 @@ const renderedPosts = await Promise.all(
     };
   })
 );
+
+const freeCount = countryPosts.filter((post) => post.data.tier === 'free').length;
+const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').length;
 ---
 
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>{countryName} - World Trip Blog</title>
+    <title>{countryName} - 世界游记</title>
+    <meta
+      name="description"
+      content={`${countryName} 的夜生活游记、长文记录与付费内容归档。`}
+    />
     <style>
+      :root {
+        --bg: #f8f3f8;
+        --bg-soft: #fcf7fc;
+        --panel: rgba(255, 255, 255, 0.7);
+        --panel-strong: rgba(255, 255, 255, 0.88);
+
+        --text: #20171f;
+        --muted: #7d6879;
+
+        --line: rgba(80, 42, 72, 0.10);
+        --line-strong: rgba(80, 42, 72, 0.16);
+
+        --accent: #b05c8e;
+        --accent-2: #d88cc8;
+        --accent-soft: rgba(176, 92, 142, 0.10);
+
+        --free-bg: #f3e8f7;
+        --free-text: #7a3d86;
+
+        --paid-bg: #fde7f1;
+        --paid-text: #b13b73;
+
+        --shadow: 0 14px 36px rgba(113, 61, 104, 0.08);
+        --hero-shadow: 0 20px 60px rgba(113, 61, 104, 0.10);
+      }
+
+      :root[data-theme='dark'] {
+        --bg: #0c0b14;
+        --bg-soft: #131222;
+        --panel: rgba(18, 20, 34, 0.78);
+        --panel-strong: rgba(24, 27, 46, 0.92);
+
+        --text: #f7f2ff;
+        --muted: #b8a8d6;
+
+        --line: rgba(120, 104, 255, 0.18);
+        --line-strong: rgba(255, 79, 216, 0.26);
+
+        --accent: #ff4fd8;
+        --accent-2: #6ae2ff;
+        --accent-soft: rgba(255, 79, 216, 0.14);
+
+        --free-bg: rgba(106, 226, 255, 0.14);
+        --free-text: #8beaff;
+
+        --paid-bg: rgba(255, 79, 216, 0.14);
+        --paid-text: #ff8ee7;
+
+        --shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+        --hero-shadow: 0 24px 68px rgba(0, 0, 0, 0.42);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
-        font-family: Arial, sans-serif;
         margin: 0;
-        background: #f7f7f7;
-        color: #222;
+        font-family: Inter, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(255, 79, 216, 0.08), transparent 30%),
+          radial-gradient(circle at top right, rgba(106, 226, 255, 0.08), transparent 26%),
+          radial-gradient(circle at bottom center, rgba(120, 104, 255, 0.08), transparent 36%),
+          var(--bg);
+      }
+
+      a {
+        color: inherit;
       }
 
       .container {
-        max-width: 1200px;
+        max-width: 1240px;
         margin: 0 auto;
-        padding: 50px 24px 80px;
+        padding: 24px 24px 88px;
       }
 
-      .topbar {
-        margin-bottom: 30px;
+      .site-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 22px;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
       }
 
       .back-link {
         text-decoration: none;
-        color: #444;
+        color: var(--muted);
         font-size: 14px;
+        font-weight: 600;
+      }
+
+      .back-link:hover {
+        color: var(--text);
       }
 
       .hero {
-        margin-bottom: 30px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 30px;
+        padding: 34px;
+        box-shadow: var(--hero-shadow);
+        margin-bottom: 26px;
       }
 
-      .hero h1 {
-        font-size: 48px;
-        margin: 0 0 10px;
+      .hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 24px;
+        flex-wrap: wrap;
       }
 
-      .hero p {
+      .hero-copy {
+        max-width: 760px;
+      }
+
+      .hero-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 16px 0 12px;
+        font-size: clamp(40px, 6vw, 66px);
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+      }
+
+      .hero-subtitle {
+        font-size: 17px;
+        line-height: 1.85;
+        color: var(--muted);
+        max-width: 62ch;
         margin: 0;
-        color: #666;
-        font-size: 18px;
+      }
+
+      .hero-stats {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+      }
+
+      .hero-stat {
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: var(--panel-strong);
+        border: 1px solid var(--line);
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .filter-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        border: 1px solid var(--line-strong);
+        background: var(--panel-strong);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .filter-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .filter-btn.active {
+        background: var(--text);
+        color: var(--bg);
+        border-color: transparent;
+        box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.16), 0 0 18px rgba(255, 79, 216, 0.10);
       }
 
       .layout {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 260px;
-        gap: 28px;
+        grid-template-columns: minmax(0, 1fr) 290px;
+        gap: 26px;
         align-items: start;
       }
 
@@ -102,11 +265,26 @@ const renderedPosts = await Promise.all(
         gap: 20px;
       }
 
+      .post-card,
+      .sidebar {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: var(--shadow);
+      }
+
       .post-card {
-        background: white;
-        border-radius: 18px;
-        padding: 22px 24px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        border-radius: 26px;
+        padding: 18px;
+        overflow: hidden;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      }
+
+      .post-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--line-strong);
+        box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.12), 0 10px 30px rgba(106, 226, 255, 0.06);
       }
 
       .post-summary {
@@ -118,74 +296,188 @@ const renderedPosts = await Promise.all(
         display: none;
       }
 
+      .post-header {
+        display: grid;
+        grid-template-columns: 270px minmax(0, 1fr);
+        gap: 22px;
+        align-items: start;
+      }
+
+      .post-cover {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.06);
+      }
+
+      .post-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .post-cover.placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 13px;
+        border: 1px dashed var(--line-strong);
+        background: transparent;
+      }
+
+      .post-info {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
       .post-title-row {
         display: flex;
         align-items: center;
         gap: 10px;
         flex-wrap: wrap;
+        margin-bottom: 10px;
       }
 
       .post-title {
-        font-size: 28px;
-        font-weight: bold;
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1.08;
+        letter-spacing: -0.04em;
       }
 
       .badge {
-        display: inline-block;
-        padding: 4px 10px;
+        display: inline-flex;
+        align-items: center;
         border-radius: 999px;
-        font-size: 12px;
-        font-weight: bold;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
       }
 
       .badge.free {
-        background: #e8f7e8;
-        color: #246b2a;
+        background: var(--free-bg);
+        color: var(--free-text);
       }
 
       .badge.paid {
-        background: #f7eadf;
-        color: #8a4b08;
+        background: var(--paid-bg);
+        color: var(--paid-text);
       }
 
       .post-meta {
-        color: #666;
-        font-size: 14px;
-        margin-top: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
       }
 
       .post-excerpt {
-        margin-top: 14px;
-        color: #333;
-        line-height: 1.7;
+        color: var(--muted);
+        line-height: 1.85;
+        font-size: 15px;
+      }
+
+      .expand-tip {
+        margin-top: auto;
+        padding-top: 16px;
+        font-size: 13px;
+        color: var(--accent);
+        font-weight: 700;
       }
 
       .post-body {
+        text-align: justify;
         margin-top: 22px;
-        padding-top: 20px;
-        border-top: 1px solid #eee;
-        line-height: 1.8;
+        padding: 26px 10px 8px;
+        border-top: 1px solid var(--line);
       }
 
-      .post-body img {
+      .prose {
+        max-width: 72ch;
+        font-size: 17px;
+        line-height: 1.95;
+      }
+
+      .prose :global(h1),
+      .prose :global(h2),
+      .prose :global(h3),
+      .prose :global(h4) {
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+        margin-top: 1.8em;
+        margin-bottom: 0.7em;
+      }
+
+      .prose :global(h2) {
+        font-size: 30px;
+      }
+
+      .prose :global(h3) {
+        font-size: 24px;
+      }
+
+      .prose :global(p),
+      .prose :global(li),
+      .prose :global(blockquote) {
+        color: var(--text);
+      }
+
+      .prose :global(p) {
+        margin: 1em 0;
+      }
+
+      .prose :global(ul),
+      .prose :global(ol) {
+        padding-left: 1.4em;
+      }
+
+      .prose :global(blockquote) {
+        margin: 1.4em 0;
+        padding: 0.9em 1em;
+        border-left: 3px solid var(--accent);
+        background: var(--accent-soft);
+        border-radius: 0 14px 14px 0;
+      }
+
+      .prose :global(img) {
         max-width: 100%;
-        border-radius: 12px;
-        margin: 16px 0;
+        display: block;
+        border-radius: 18px;
+        margin: 22px 0;
+      }
+
+      .prose :global(a) {
+        color: var(--accent);
       }
 
       .sidebar {
         position: sticky;
         top: 24px;
-        background: white;
-        border-radius: 18px;
-        padding: 20px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        border-radius: 24px;
+        padding: 22px 18px;
       }
 
       .sidebar h3 {
-        margin-top: 0;
-        margin-bottom: 14px;
-        font-size: 20px;
+        margin: 0 0 8px;
+        font-size: 21px;
+        letter-spacing: -0.03em;
+      }
+
+      .sidebar p {
+        margin: 0 0 16px;
+        color: var(--muted);
+        line-height: 1.7;
+        font-size: 14px;
       }
 
       .sidebar ul {
@@ -197,37 +489,88 @@ const renderedPosts = await Promise.all(
       }
 
       .sidebar a {
+        display: block;
         text-decoration: none;
-        color: #333;
-        font-size: 15px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.5;
+        transition: background 0.18s ease, border-color 0.18s ease;
       }
 
       .sidebar a:hover {
-        color: #000;
+        background: var(--accent-soft);
+        border-color: var(--line);
       }
 
       .locked-box {
-        margin-top: 16px;
-        padding: 16px 18px;
-        border-radius: 14px;
-        background: #faf4ec;
-        border: 1px solid #f0dcc3;
+        max-width: 72ch;
+        margin-top: 6px;
+        padding: 20px 20px 18px;
+        border-radius: 20px;
+        background: var(--paid-bg);
+        border: 1px solid rgba(255, 79, 216, 0.18);
       }
 
       .locked-box strong {
         display: block;
         margin-bottom: 8px;
+        font-size: 16px;
       }
 
-      .locked-box a {
-        display: inline-block;
-        margin-top: 10px;
+      .locked-box p {
+        margin: 0;
+        line-height: 1.85;
+        color: var(--text);
+      }
+
+      .locked-actions {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 999px;
         text-decoration: none;
-        color: #8a4b08;
-        font-weight: bold;
+        font-weight: 700;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
       }
 
-      @media (max-width: 900px) {
+      .button:hover {
+        transform: translateY(-1px);
+      }
+
+      .button-primary {
+        background: var(--text);
+        color: var(--bg);
+      }
+
+      .button-primary:hover {
+        box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.18), 0 0 20px rgba(255, 79, 216, 0.12);
+      }
+
+      .button-secondary {
+        border: 1px solid var(--line-strong);
+        color: var(--text);
+        background: var(--panel-strong);
+      }
+
+      .fi {
+        border-radius: 2px;
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+        vertical-align: -1px;
+      }
+
+      @media (max-width: 1040px) {
         .layout {
           grid-template-columns: 1fr;
         }
@@ -236,54 +579,169 @@ const renderedPosts = await Promise.all(
           position: static;
         }
       }
+
+      @media (max-width: 780px) {
+        .container {
+          padding: 18px 16px 68px;
+        }
+
+        .hero {
+          padding: 24px 18px;
+          border-radius: 24px;
+        }
+
+        .post-card,
+        .sidebar {
+          border-radius: 22px;
+        }
+
+        .post-header {
+          grid-template-columns: 1fr;
+        }
+
+        .post-title {
+          font-size: 28px;
+        }
+
+        .prose {
+          font-size: 16px;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <div class="topbar">
-        <a class="back-link" href="/">← Back to home</a>
-      </div>
+      <header class="site-header">
+        <a class="back-link" href="/">← 返回首页</a>
+
+        <div class="header-actions">
+          <a class="back-link" href={currentUser ? '/account' : '/login'}>
+            {currentUser ? '我的账户' : '登录 / 注册'}
+          </a>
+          <ThemeToggle />
+        </div>
+      </header>
 
       <section class="hero">
-        <h1>{flag} {countryName}</h1>
-        <p>{region} · {countryPosts.length} travel notes</p>
+        <div class="hero-top">
+          <div class="hero-copy">
+            <span class="hero-kicker">国家/地区归档页</span>
+            <h1>
+              {countryCode ? (
+                <span class={`fi fi-${countryCode.toLowerCase()}`}></span>
+              ) : (
+                <span>🏳️</span>
+              )}
+              <span style="margin-left: 12px;">{countryName}</span>
+            </h1>
+            <p class="hero-subtitle">
+              同一个国家，不同的城市，不一样的面孔。
+              有人记住白天的风景，有人记住夜里的灯火。
+              这里把那些分散在不同时刻的见闻、情绪与体感，重新放在一起。
+            </p>
+
+            <div class="hero-stats">
+              <span class="hero-stat">{region}</span>
+              <span class="hero-stat">{countryPosts.length} 篇内容</span>
+              <span class="hero-stat">{freeCount} 篇免费</span>
+              <span class="hero-stat">{paidCount} 篇付费</span>
+              <span class="hero-stat">
+                {hasPaidAccess ? '会员访问已开启' : currentUser ? '当前账号未解锁付费内容' : '未登录'}
+              </span>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all" type="button">全部</button>
+            <button class="filter-btn" data-filter="free" type="button">免费</button>
+            <button class="filter-btn" data-filter="paid" type="button">付费</button>
+          </div>
+        </div>
       </section>
 
       <div class="layout">
         <main class="main-column">
           {renderedPosts.map(({ post, Content }) => (
-            <details class="post-card" id={post.data.slug}>
+            <details class="post-card" id={post.data.slug} data-tier={post.data.tier}>
               <summary class="post-summary">
-                <div class="post-title-row">
-                  <div class="post-title">{post.data.title}</div>
-                  <span class={`badge ${post.data.tier}`}>
-                    {post.data.tier.toUpperCase()}
-                  </span>
-                </div>
+                <div class="post-header">
+                  {post.data.cover ? (
+                    <div class="post-cover">
+                      <img src={post.data.cover} alt={post.data.title} loading="lazy" />
+                    </div>
+                  ) : (
+                    <div class="post-cover placeholder">暂无封面</div>
+                  )}
 
-                <div class="post-meta">
-                  {post.data.flag} {post.data.country} · {post.data.date.toLocaleDateString()}
-                </div>
+                  <div class="post-info">
+                    <div class="post-title-row">
+                      <div class="post-title">{post.data.title}</div>
+                      <span class={`badge ${post.data.tier}`}>
+                        {post.data.tier === 'free' ? '免费' : '付费'}
+                      </span>
+                    </div>
 
-                <div class="post-excerpt">
-                  {post.data.summary}
+                    <div class="post-meta">
+                      {post.data.countryCode ? (
+                        <span class={`fi fi-${post.data.countryCode.toLowerCase()}`}></span>
+                      ) : (
+                        <span>🏳️</span>
+                      )}
+                      <span>{post.data.country} · {post.data.region}</span>
+                      <span>·</span>
+                      <span>
+                        {new Date(post.data.date).toLocaleDateString('zh-CN', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </div>
+
+                    <div class="post-excerpt">
+                      {post.data.summary}
+                    </div>
+
+                    <div class="expand-tip">
+                      点击展开阅读 {
+                        post.data.tier === 'free'
+                          ? '全文'
+                          : hasPaidAccess
+                            ? '全文'
+                            : '摘要'
+                      } ↓
+                    </div>
+                  </div>
                 </div>
               </summary>
 
-              {post.data.tier === 'free' ? (
+              {post.data.tier === 'free' || hasPaidAccess ? (
                 <div class="post-body">
-                  <Content />
+                  <article class="prose">
+                    <Content />
+                  </article>
                 </div>
               ) : (
                 <div class="post-body">
-                  <p>{post.data.summary}</p>
-
                   <div class="locked-box">
-                    <strong>Members-only content</strong>
-                    This travel note is reserved for paid subscribers.
-                    Later we can connect this area to your subscription system.
-                    <br />
-                    <a href="/pricing">Subscribe to unlock →</a>
+                    <strong>
+                      {currentUser ? '当前内容需要有效会员权限' : '当前内容需要登录后查看会员状态'}
+                    </strong>
+
+                    <p>
+                      {currentUser
+                        ? '你已登录，但当前账号没有有效会员记录，暂时只能查看摘要。开通后将自动解锁完整正文。'
+                        : '这篇内容属于付费内容。请先登录，再根据你的会员状态自动判断是否解锁。'}
+                    </p>
+
+                    <div class="locked-actions">
+                      {!currentUser ? (
+                        <a class="button button-primary" href="/login">登录后查看</a>
+                      ) : (
+                        <a class="button button-primary" href="/pricing">前往订阅</a>
+                      )}
+                      <a class="button button-secondary" href="/account">我的账户</a>
+                    </div>
                   </div>
                 </div>
               )}
@@ -292,7 +750,11 @@ const renderedPosts = await Promise.all(
         </main>
 
         <aside class="sidebar">
-          <h3>In this country</h3>
+          <h3>本页目录</h3>
+          <p>
+            快速浏览当前国家下的全部内容。等文章数量增多后，这里会更实用。
+          </p>
+
           <ul>
             {countryPosts.map((post) => (
               <li>
@@ -303,5 +765,31 @@ const renderedPosts = await Promise.all(
         </aside>
       </div>
     </div>
+
+    <script is:inline>
+      window.addEventListener('DOMContentLoaded', () => {
+        const buttons = document.querySelectorAll('.filter-btn');
+        const cards = document.querySelectorAll('.post-card');
+
+        buttons.forEach((button) => {
+          button.addEventListener('click', () => {
+            const filter = button.getAttribute('data-filter');
+
+            buttons.forEach((btn) => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            cards.forEach((card) => {
+              const tier = card.getAttribute('data-tier');
+
+              if (filter === 'all' || tier === filter) {
+                card.style.display = '';
+              } else {
+                card.style.display = 'none';
+              }
+            });
+          });
+        });
+      });
+    </script>
   </body>
 </html>

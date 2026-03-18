@@ -1,14 +1,14 @@
 ---
-title: "Delhi Notes"
+title: "新德里GB路"
 slug: "delhi-notes"
 country: "India"
-region: "South Asia"
-flag: "🇮🇳"
+countryCode: "IN"
+region: "亚洲-南亚"
 date: 2015-02-12
 tier: "free"
 summary: "关于德里街头、气味、秩序与混乱的第一印象。"
 cover: "/images/india/delhi-cover.jpg"
-tags: ["India", "Delhi", "Travel"]
+tags: ["印度", "新德里"]
 order: 1
 ---
 

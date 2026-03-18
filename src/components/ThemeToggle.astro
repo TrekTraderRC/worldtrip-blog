@@ -1,0 +1,77 @@
+---
+
+---
+
+<div class="theme-toggle">
+  <button id="theme-toggle-btn" aria-label="Toggle theme">
+    <span class="theme-icon theme-icon-light">☀</span>
+    <span class="theme-icon theme-icon-dark">☾</span>
+  </button>
+</div>
+
+<script is:inline>
+  const STORAGE_KEY = 'worldtrip-theme';
+
+  function getPreferredTheme() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === 'light' || stored === 'dark') return stored;
+
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return systemPrefersDark ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  function initTheme() {
+    applyTheme(getPreferredTheme());
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(STORAGE_KEY, next);
+    applyTheme(next);
+  }
+
+  initTheme();
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) {
+      btn.addEventListener('click', toggleTheme);
+    }
+  });
+</script>
+
+<style>
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+  }
+
+  #theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 999px;
+    padding: 10px 14px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    font-size: 16px;
+  }
+
+  #theme-toggle-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .theme-icon {
+    line-height: 1;
+  }
+</style>

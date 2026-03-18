@@ -2,8 +2,8 @@
 title: "Test Post"
 slug: "test-post"
 country: "Testland"
+countryCode: "UN"
 region: "Test Region"
-flag: "🏳️"
 date: 2025-01-01
 tier: "free"
 summary: "This is a test post."
