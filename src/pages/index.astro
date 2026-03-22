@@ -37,6 +37,92 @@ const countries = Array.from(countriesMap.values()).sort((a, b) =>
 
 const freeCount = posts.filter((post) => post.data.tier === 'free').length;
 const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
+
+const zodiacSigns = [
+  { name: '白羊', symbol: '♈', element: 'fire' },
+  { name: '金牛', symbol: '♉', element: 'earth' },
+  { name: '双子', symbol: '♊', element: 'air' },
+  { name: '巨蟹', symbol: '♋', element: 'water' },
+  { name: '狮子', symbol: '♌', element: 'fire' },
+  { name: '处女', symbol: '♍', element: 'earth' },
+  { name: '天秤', symbol: '♎', element: 'air' },
+  { name: '天蝎', symbol: '♏', element: 'water' },
+  { name: '射手', symbol: '♐', element: 'fire' },
+  { name: '摩羯', symbol: '♑', element: 'earth' },
+  { name: '水瓶', symbol: '♒', element: 'air' },
+  { name: '双鱼', symbol: '♓', element: 'water' },
+] as const;
+
+const zodiacAnimals = [
+  { id: 'rat', name: '子鼠', shortName: '鼠', icon: '🐭' },
+  { id: 'ox', name: '丑牛', shortName: '牛', icon: '🐮' },
+  { id: 'tiger', name: '寅虎', shortName: '虎', icon: '🐯' },
+  { id: 'rabbit', name: '卯兔', shortName: '兔', icon: '🐰' },
+  { id: 'dragon', name: '辰龙', shortName: '龙', icon: '🐲' },
+  { id: 'snake', name: '巳蛇', shortName: '蛇', icon: '🐍' },
+  { id: 'horse', name: '午马', shortName: '马', icon: '🐴' },
+  { id: 'goat', name: '未羊', shortName: '羊', icon: '🐐' },
+  { id: 'monkey', name: '申猴', shortName: '猴', icon: '🐵' },
+  { id: 'rooster', name: '酉鸡', shortName: '鸡', icon: '🐔' },
+  { id: 'dog', name: '戌狗', shortName: '狗', icon: '🐶' },
+  { id: 'pig', name: '亥猪', shortName: '猪', icon: '🐷' },
+] as const;
+
+type SignName = typeof zodiacSigns[number]['name'];
+type AnimalId = typeof zodiacAnimals[number]['id'];
+
+type CollectionCounts = Record<AnimalId, Record<SignName, number>>;
+
+/**
+ * 以后你只改这里
+ * - 每个生肖下 12 个星座
+ * - 没有就填 0
+ */
+const collectionCounts: CollectionCounts = {
+  rat:    { 白羊: 2, 金牛: 0, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 1, 摩羯: 0, 水瓶: 0, 双鱼: 0 },
+  ox:     { 白羊: 0, 金牛: 1, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 0, 双鱼: 2 },
+  tiger:  { 白羊: 0, 金牛: 0, 双子: 2, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 1, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 1, 双鱼: 0 },
+  rabbit: { 白羊: 0, 金牛: 1, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 1, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 1, 水瓶: 0, 双鱼: 0 },
+  dragon: { 白羊: 1, 金牛: 0, 双子: 0, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 1, 射手: 1, 摩羯: 0, 水瓶: 0, 双鱼: 0 },
+  snake:  { 白羊: 0, 金牛: 0, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 1, 天秤: 0, 天蝎: 1, 射手: 0, 摩羯: 0, 水瓶: 0, 双鱼: 1 },
+  horse:  { 白羊: 0, 金牛: 0, 双子: 1, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 1, 双鱼: 0 },
+  goat:   { 白羊: 0, 金牛: 1, 双子: 0, 巨蟹: 0, 狮子: 0, 处女: 1, 天秤: 0, 天蝎: 1, 射手: 0, 摩羯: 0, 水瓶: 0, 双鱼: 1 },
+  monkey: { 白羊: 1, 金牛: 0, 双子: 0, 巨蟹: 0, 狮子: 1, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 1, 摩羯: 0, 水瓶: 0, 双鱼: 0 },
+  rooster:{ 白羊: 0, 金牛: 0, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 0, 天秤: 1, 天蝎: 0, 射手: 0, 摩羯: 1, 水瓶: 0, 双鱼: 1 },
+  dog:    { 白羊: 0, 金牛: 0, 双子: 1, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 0, 双鱼: 2 },
+  pig:    { 白羊: 0, 金牛: 1, 双子: 0, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 1, 双鱼: 1 },
+};
+
+const formatCount2 = (num: number) => String(num).padStart(2, '0');
+
+const collectionBoard = zodiacAnimals.map((animal) => {
+  const signCountMap = collectionCounts[animal.id];
+
+  const signs = zodiacSigns.map((sign) => {
+    const count = signCountMap[sign.name];
+    return {
+      ...sign,
+      count,
+      unlocked: count > 0,
+    };
+  });
+
+  const unlockedKinds = signs.filter((sign) => sign.unlocked).length;
+  const totalCount = signs.reduce((sum, sign) => sum + sign.count, 0);
+
+  return {
+    animal: animal.name,
+    animalShortName: animal.shortName,
+    animalIcon: animal.icon,
+    signs,
+    unlockedKinds,
+    totalCount,
+  };
+});
+
+const totalCollectionCount = zodiacAnimals.length * zodiacSigns.length;
+const unlockedCollectionCount = collectionBoard.reduce((sum, item) => sum + item.unlockedKinds, 0);
+const collectionProgress = Math.round((unlockedCollectionCount / totalCollectionCount) * 100);
 ---
 
 <html lang="zh-CN">
@@ -99,6 +185,63 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
 
         --hero-shadow: 0 24px 64px rgba(0, 0, 0, 0.42);
         --card-shadow: 0 14px 36px rgba(0, 0, 0, 0.30);
+      }
+
+      :root[data-theme='dark'] .constellation-chip.unlocked {
+        color: #ffffff;
+        background:
+          linear-gradient(180deg, rgba(255, 79, 216, 0.30), rgba(106, 226, 255, 0.20));
+        border-color: rgba(255, 79, 216, 0.42);
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.12),
+          0 0 0 1px rgba(255, 79, 216, 0.14),
+          0 0 24px rgba(255, 79, 216, 0.16);
+      }
+
+      /* 浅色版：未点亮 capsule 的文字再深一点 */
+      :root:not([data-theme='dark']) .constellation-chip {
+        color: #5f5567;
+        background: rgba(255, 255, 255, 0.72);
+        border-color: rgba(110, 82, 110, 0.14);
+      }
+
+      /* 浅色版：已点亮 capsule 整体更清晰 */
+      :root:not([data-theme='dark']) .constellation-chip.unlocked {
+        color: #4a2343;
+        background: linear-gradient(180deg, rgba(255, 170, 225, 0.34), rgba(222, 174, 255, 0.26));
+        border-color: rgba(235, 125, 214, 0.46);
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.72),
+          0 0 0 1px rgba(255, 160, 223, 0.18);
+      }
+
+      /* 浅色版：星座符号底块和符号本身更明显 */
+      :root:not([data-theme='dark']) .constellation-chip .constellation-symbol {
+        background: rgba(121, 96, 190, 0.14);
+        color: #6a55b6;
+      }
+
+      :root:not([data-theme='dark']) .constellation-chip.unlocked .constellation-symbol {
+        background: rgba(169, 107, 255, 0.22);
+        color: #5a33c7;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+      }
+
+      /* 浅色版：不同元素类型的已点亮符号再拉开一点 */
+      :root:not([data-theme='dark']) .constellation-chip.fire.unlocked .constellation-symbol {
+        color: #c45d46;
+      }
+
+      :root:not([data-theme='dark']) .constellation-chip.earth.unlocked .constellation-symbol {
+        color: #8a6f2a;
+      }
+
+      :root:not([data-theme='dark']) .constellation-chip.air.unlocked .constellation-symbol {
+        color: #3f73b8;
+      }
+
+      :root:not([data-theme='dark']) .constellation-chip.water.unlocked .constellation-symbol {
+        color: #4f63c9;
       }
 
       * {
@@ -187,7 +330,8 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
       .note-card,
       .country-card,
       .pricing-card,
-      .footer-card {
+      .footer-card,
+      .collection-card {
         border: 1px solid var(--line);
         background: var(--panel);
         backdrop-filter: blur(10px);
@@ -196,9 +340,100 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
       }
 
       .hero-main {
+        position: relative;
+        overflow: hidden;
         border-radius: 28px;
         padding: 40px 34px;
         box-shadow: var(--hero-shadow);
+      }
+
+      .hero-main-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 28px;
+        align-items: start;
+      }
+
+      .hero-heading {
+        grid-column: 1 / -1;
+        position: relative;
+        z-index: 2;
+      }
+
+      .hero-content {
+        grid-column: 1;
+        position: relative;
+        z-index: 2;
+        min-width: 0;
+      }
+
+      .hero-visual-wrap {
+        grid-column: 2;
+        position: relative;
+        z-index: 1;
+        justify-self: end;
+        align-self: start;
+        margin-top: 8px;
+      }
+
+      .hero-visual-glow {
+        position: absolute;
+        inset: auto -16px -16px -16px;
+        height: 160px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(176, 92, 142, 0.18), transparent 68%);
+        filter: blur(10px);
+        pointer-events: none;
+      }
+
+      .hero-visual {
+        position: relative;
+        width: 100%;
+        max-width: 270px;
+        aspect-ratio: 9 / 16;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: var(--panel-strong);
+        box-shadow: 0 20px 50px rgba(113, 61, 104, 0.16);
+        transform: rotate(0deg);
+      }
+
+      .hero-visual img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .hero-visual.placeholder {
+        display: flex;
+        align-items: end;
+        justify-content: start;
+        padding: 18px;
+        background:
+          linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.18)),
+          radial-gradient(circle at top right, rgba(216, 140, 200, 0.28), transparent 34%),
+          radial-gradient(circle at bottom left, rgba(176, 92, 142, 0.22), transparent 42%),
+          var(--panel-strong);
+      }
+
+      .hero-visual-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+
+      :root[data-theme='dark'] .hero-visual-note {
+        background: rgba(18, 20, 34, 0.72);
       }
 
       .eyebrow {
@@ -216,17 +451,17 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
       }
 
       h1 {
-        margin: 18px 0 16px;
-        font-size: clamp(42px, 6vw, 72px);
-        line-height: 0.96;
+        margin: 18px 0 22px;
+        font-size: clamp(32px, 4.8vw, 64px);
+        line-height: 1.02;
         letter-spacing: -0.05em;
-        max-width: 10ch;
+        max-width: none;
       }
 
       .hero-copy {
         max-width: 68ch;
-        font-size: 17px;
-        line-height: 1.95;
+        font-size: 16px;
+        line-height: 1.75;
         color: var(--muted);
         white-space: pre-line;
       }
@@ -411,29 +646,33 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
         align-items: center;
         justify-content: space-between;
         gap: 14px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
       }
 
       .country-name {
         display: flex;
         align-items: center;
         gap: 10px;
-        font-weight: 700;
         font-size: 18px;
-      }
-
-      .country-meta {
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.6;
+        font-weight: 700;
       }
 
       .country-count {
-        font-size: 12px;
-        color: var(--muted);
+        display: inline-flex;
         padding: 6px 10px;
         border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
         background: var(--accent-soft);
+      }
+
+      .country-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+        font-size: 14px;
       }
 
       .notes-grid {
@@ -503,11 +742,10 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
         display: inline-flex;
         align-items: center;
         border-radius: 999px;
-        padding: 5px 10px;
-        font-size: 11px;
+        padding: 6px 10px;
+        font-size: 12px;
         font-weight: 800;
         letter-spacing: 0.06em;
-        text-transform: uppercase;
       }
 
       .badge.free {
@@ -521,49 +759,332 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
       }
 
       .note-location {
+        display: inline-flex;
+        align-items: center;
         color: var(--muted);
         font-size: 13px;
       }
 
       .note-title {
+        margin: 0;
         font-size: 28px;
-        line-height: 1.15;
         letter-spacing: -0.04em;
-        margin: 0 0 12px;
       }
 
       .note-summary {
+        margin: 0;
         color: var(--muted);
         line-height: 1.85;
-        font-size: 15px;
-        margin: 0 0 16px;
       }
 
       .note-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 16px;
+        gap: 14px;
         margin-top: auto;
         flex-wrap: wrap;
       }
 
       .note-date {
-        font-size: 13px;
         color: var(--muted);
+        font-size: 13px;
       }
 
       .note-link {
         text-decoration: none;
         font-weight: 700;
+      }
+
+      .note-link:hover {
         color: var(--accent);
+      }
+
+      .collection-card {
+        border-radius: 28px;
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .collection-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at top right, rgba(216, 140, 200, 0.10), transparent 24%),
+          radial-gradient(circle at bottom left, rgba(176, 92, 142, 0.08), transparent 28%);
+        pointer-events: none;
+      }
+
+      .collection-head {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+      }
+
+      .collection-title {
+        margin: 0;
+        font-size: 30px;
+        letter-spacing: -0.04em;
+      }
+
+      .collection-desc {
+        margin: 8px 0 0;
+        color: var(--muted);
+        line-height: 1.8;
+        max-width: 52ch;
+      }
+
+      .collection-summary {
+        position: relative;
+        z-index: 1;
+        min-width: 220px;
+        padding: 18px 20px;
+        border-radius: 24px;
+        background: var(--panel-strong);
+        border: 1px solid var(--line);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+      }
+
+      .collection-summary strong {
+        display: block;
+        font-size: 30px;
+        line-height: 1;
+        letter-spacing: -0.05em;
+        margin-bottom: 10px;
+      }
+
+      .collection-summary span {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .collection-progress {
+        margin-top: 12px;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(125, 104, 121, 0.12);
+        overflow: hidden;
+      }
+
+      .collection-progress-bar {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        box-shadow: 0 0 18px rgba(176, 92, 142, 0.28);
+      }
+
+      .collection-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .collection-item {
+        padding: 18px;
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.60), rgba(255,255,255,0.42));
+        border: 1px solid var(--line);
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
+
+      :root[data-theme='dark'] .collection-item {
+        background: linear-gradient(180deg, rgba(24,27,46,0.92), rgba(18,20,34,0.84));
+      }
+
+      .collection-item:hover {
+        transform: translateY(-3px);
+        border-color: var(--line-strong);
+        box-shadow:
+          0 0 0 1px rgba(255, 79, 216, 0.10),
+          0 12px 30px rgba(106, 226, 255, 0.06);
+      }
+
+      .collection-item.legendary {
+        box-shadow: 0 0 0 1px rgba(216, 140, 200, 0.10);
+      }
+
+      .collection-item.rare {
+        box-shadow: 0 0 0 1px rgba(176, 92, 142, 0.08);
+      }
+
+      .collection-item-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .collection-animal {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .collection-animal-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 18px;
+        font-size: 28px;
+        background: linear-gradient(180deg, rgba(176, 92, 142, 0.12), rgba(216, 140, 200, 0.08));
+        border: 1px solid rgba(176, 92, 142, 0.12);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+      }
+
+      .collection-animal-text h3 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+      }
+
+      .collection-total {
+        display: inline-flex;
+        margin-top: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        color: var(--muted);
+      }
+
+      .collection-count {
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+        background: var(--accent-soft);
+        white-space: nowrap;
+      }
+
+      .constellation-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+      }
+
+      .constellation-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 34px;
+        padding: 7px 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.38);
+        color: var(--muted);
+        transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+      }
+
+      :root[data-theme='dark'] .constellation-chip {
+        background: rgba(255,255,255,0.02);
+      }
+
+      .constellation-chip .constellation-symbol {
+        font-size: 14px;
+        opacity: 0.82;
+      }
+
+      .constellation-chip.unlocked {
+        color: #fff7ff;
+        background:
+          linear-gradient(180deg, rgba(255, 79, 216, 0.22), rgba(120, 104, 255, 0.18));
+        border-color: rgba(255, 79, 216, 0.34);
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.16),
+          0 0 0 1px rgba(255, 79, 216, 0.10),
+          0 0 18px rgba(120, 104, 255, 0.14);
+      }
+
+      .constellation-chip.unlocked:hover {
+        transform: translateY(-1px);
+      }
+
+      .constellation-chip.fire.unlocked .constellation-symbol {
+        color: #e07a5f;
+      }
+
+      .constellation-chip.earth.unlocked .constellation-symbol {
+        color: #8b7d4f;
+      }
+
+      .constellation-chip.air.unlocked .constellation-symbol {
+        color: #5f8fb5;
+      }
+
+      .constellation-chip.water.unlocked .constellation-symbol {
+        color: #5d7bd8;
+      }
+
+      .collection-footnote {
+        position: relative;
+        z-index: 1;
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.8;
+      }
+
+      .constellation-count {
+        margin-left: 2px;
+        font-variant-numeric: tabular-nums;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        opacity: 0.92;
+      }
+
+      :root:not([data-theme='dark']) .constellation-chip {
+        color: #5f5567;
+        background: rgba(255, 255, 255, 0.72);
+        border-color: rgba(110, 82, 110, 0.14);
+      }
+
+      :root:not([data-theme='dark']) .constellation-chip.unlocked {
+        color: #4a2343;
+        background: linear-gradient(180deg, rgba(255, 170, 225, 0.34), rgba(222, 174, 255, 0.26));
+        border-color: rgba(235, 125, 214, 0.46);
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.72),
+          0 0 0 1px rgba(255, 160, 223, 0.18);
+      }
+
+      :root:not([data-theme='dark']) .constellation-chip .constellation-symbol {
+        background: rgba(121, 96, 190, 0.14);
+        color: #6a55b6;
+      }
+
+      :root:not([data-theme='dark']) .constellation-chip.unlocked .constellation-symbol {
+        background: rgba(169, 107, 255, 0.22);
+        color: #5a33c7;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+      }
+
+      :root:not([data-theme='dark']) .collection-count {
+        color: #70596c;
       }
 
       .pricing-card {
         border-radius: 28px;
-        padding: 30px 28px;
+        padding: 28px;
         display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+        grid-template-columns: minmax(0, 1fr) 420px;
         gap: 24px;
       }
 
@@ -591,6 +1112,8 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
         border: 1px solid var(--line);
         color: var(--text);
         line-height: 1.7;
+        display: flex;
+        align-items: center;
       }
 
       .footer-card {
@@ -631,13 +1154,28 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
       @media (max-width: 1024px) {
         .hero,
         .pricing-card,
-        .notes-grid,
-        .countries-grid {
+        .countries-grid,
+        .collection-grid {
           grid-template-columns: 1fr;
         }
 
-        .note-card {
+        .notes-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .hero-main-grid {
           grid-template-columns: 1fr;
+        }
+
+        .hero-heading,
+        .hero-content,
+        .hero-visual-wrap {
+          grid-column: auto;
+        }
+
+        .hero-visual-wrap {
+          justify-self: start;
+          margin-top: 0;
         }
       }
 
@@ -650,7 +1188,8 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
         .hero-side,
         .section-card,
         .pricing-card,
-        .footer-card {
+        .footer-card,
+        .collection-card {
           border-radius: 22px;
           padding: 22px 18px;
         }
@@ -663,16 +1202,43 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
           grid-template-columns: 1fr;
         }
 
+        .hero-visual {
+          max-width: 210px;
+        }
+
+        .notes-grid {
+          grid-template-columns: 1fr;
+        }
         .note-title {
           font-size: 24px;
         }
 
-        .section-title {
+        .section-title,
+        .collection-title {
           font-size: 26px;
         }
 
         .pricing-copy h3 {
           font-size: 28px;
+        }
+
+        .collection-item-top h3 {
+          font-size: 20px;
+        }
+
+        .collection-animal-icon {
+          width: 46px;
+          height: 46px;
+          font-size: 24px;
+        }
+
+        .collection-animal-text h3 {
+          font-size: 22px;
+        }
+
+        .constellation-chip {
+          padding: 6px 10px;
+          font-size: 11px;
         }
       }
     </style>
@@ -695,43 +1261,65 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
 
       <section class="hero">
         <div class="hero-main">
-          <span class="eyebrow">风月无边 / 夜色档案</span>
-          <h1>愿天上人间<br>占得欢娱<br>
-            年年今夜</h1>
-          <p class="hero-copy">我走过世界上不少地方。
-白天有白天的秩序，夜晚有夜晚的语言。
-
-有些人偏爱山河古迹，有些人钟情街头美食，
-而我，更容易被一座城市入夜后的气息吸引。
-
-为了夜色，为了欲望，为了那些带着温度、香气、谎言与真心的话语，
-我想走进世界的另一面，
-看一看，
-一座城市如何在夜里呼吸，
-一个地方如何安放欲望，
-一个过客又如何在风月之中，看见人性、孤独、繁华与幻灭。
-
-自诩风流。
-若未曾见过那些五光十色、暧昧浮沉的夜色，
-只在规矩与想象里老去，未免太辜负此生。</p>
-
-          <div class="hero-actions">
-            <a class="button button-primary" href="#latest">阅读最新内容</a>
-            <a class="button button-secondary" href="/pricing">查看订阅方案</a>
-          </div>
-
-          <div class="hero-meta">
-            <div class="stat">
-              <strong>{posts.length}</strong>
-              <span>篇旅行记录</span>
+          <div class="hero-main-grid">
+            <div class="hero-heading">
+              <span class="eyebrow">风月无边 / 夜色档案</span>
+              <h1>愿天上人间 占得欢娱 <br>年年今夜 <br>————</h1>
             </div>
-            <div class="stat">
-              <strong>{countries.length}</strong>
-              <span>个国家 / 地区</span>
+
+            <div class="hero-content">
+              <p class="hero-copy">
+                我走过世界上不少地方。
+                白天有白天的秩序，夜晚有夜晚的语言。
+
+                有些人偏爱山河古迹，
+                有些人钟情街头美食，
+                而我，更容易
+                被一座城市入夜后的气息吸引。
+
+                为了夜色，为了欲望，
+                为了那些
+                带着温度、香气、谎言与真心的话语，
+                我想走进世界的另一面，
+                看一看，
+                一座城市如何在夜里呼吸，
+                一个地方如何安放欲望，
+                一个过客又如何在风月之中，
+                看见人性、孤独、繁华与幻灭。
+              </p>
+
+              <div class="hero-actions">
+                <a class="button button-primary" href="#latest">阅读最新内容</a>
+                <a class="button button-secondary" href="/pricing">查看订阅方案</a>
+              </div>
+
+              <div class="hero-meta">
+                <div class="stat">
+                  <strong>{posts.length}</strong>
+                  <span>篇旅行记录</span>
+                </div>
+                <div class="stat">
+                  <strong>{countries.length}</strong>
+                  <span>个国家 / 地区</span>
+                </div>
+                <div class="stat">
+                  <strong>{freeCount}/{paidCount}</strong>
+                  <span>免费 / 付费内容</span>
+                </div>
+              </div>
             </div>
-            <div class="stat">
-              <strong>{freeCount}/{paidCount}</strong>
-              <span>免费 / 付费内容</span>
+
+            <div class="hero-visual-wrap">
+              <div class="hero-visual-glow"></div>
+              <div class="hero-visual">
+                <img src="/images/home-hero-card.jpg" alt="夜色城市氛围图" loading="eager" />
+              </div>
+
+              <!-- 暂时没有图时可改用这个占位版
+              <div class="hero-visual placeholder">
+                <span class="hero-visual-note">夜色样本 / city fragment</span>
+              </div>
+              -->
             </div>
           </div>
         </div>
@@ -747,11 +1335,7 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
             <h2>建站初衷</h2>
             <p>
               食色性也，男欢女爱，人之大欲存焉。世界那么大，夜生活却从不雷同。不同城市、不同文化、不同制度，对于欲望的安放方式，往往比白天的观光景点更有意思。
-            <!-- </p>
-            <p> -->
               做这个站，并不只是为了猎奇，也不只是为了寻欢。我更想把那些真实存在于世界各地的风月场，作为一种城市切片记录下来：让人知道那里的价格与规则。
-            <!-- </p>  
-            <p> -->
               作为长期存在于不同文明与社会结构之中，人类历史上最古老的行业之一，如果改用一个现代视角去看，这个行业的价格、形态、密度与氛围，其实常常能折射出当地的经济状况、消费水平与社会情绪。所以这里写的，不只是风花雪月，也是另一种意义上的城市观察。
             </p>
             <p><br>不过，当下寻欢也是很重要的</p>
@@ -781,10 +1365,6 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
           <div class="section-head">
             <div>
               <h2 class="section-title">按国家/地区浏览</h2>
-              <!-- <p class="section-desc">
-                每个国家页都像一个小型专题页。比起按时间线堆叠内容，这种方式更适合沉淀旅行记忆，
-                也更适合后续不断补充同一地点的不同记录。
-              </p> -->
             </div>
           </div>
 
@@ -821,9 +1401,6 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
           <div class="section-head">
             <div>
               <h2 class="section-title">最新游记</h2>
-              <!-- <p class="section-desc">
-                首页像一个带有杂志感的入口：左侧封面，右侧标题与摘要，同时区分免费内容与付费内容。
-              </p> -->
             </div>
           </div>
 
@@ -881,12 +1458,71 @@ const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
       </section>
 
       <section class="section">
+        <div class="collection-card">
+          <div class="collection-head">
+            <div>
+              <span class="eyebrow">夜色图鉴 / Collection</span>
+              <h2 class="collection-title">生肖 × 星座</h2>
+              <p class="collection-desc">
+                夜色易散，人影难忘，相遇是缘，聚散无常。
+                缘来惜缘，缘去随缘。不问长久，但记温凉。
+                生肖为卷，星座为章，记下风月，也记情长。
+              </p>
+            </div>
+
+            <div class="collection-summary">
+              <strong>{unlockedCollectionCount} / {totalCollectionCount}</strong>
+              <span>当前解锁进度 · {collectionProgress}%</span>
+              <div class="collection-progress" aria-hidden="true">
+                <div
+                  class="collection-progress-bar"
+                  style={`width: ${collectionProgress}%;`}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="collection-grid">
+            {collectionBoard.map((item) => (
+              <article class="collection-item">
+                <div class="collection-item-top">
+                  <div class="collection-animal">
+                    <span class="collection-animal-icon" aria-hidden="true">{item.animalIcon}</span>
+                    <div class="collection-animal-text">
+                      <h3>{item.animal}</h3>
+                      <span class="collection-total">总计 {formatCount2(item.totalCount)}</span>
+                    </div>
+                  </div>
+
+                  <span class="collection-count">{item.unlockedKinds} / 12</span>
+                </div>
+
+                <div class="constellation-list">
+                  {item.signs.map((sign) => (
+                    <span class={`constellation-chip ${sign.unlocked ? 'unlocked' : ''} ${sign.element}`}>
+                      <span class="constellation-symbol" aria-hidden="true">{sign.symbol}</span>
+                      <span class="constellation-name">{sign.name}</span>
+                      <span class="constellation-count">{formatCount2(sign.count)}</span>
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <p class="collection-footnote">
+            缘起缘灭缘终尽，花开花落花归尘。半善半恶半随心，难彻难悟难归真。
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="pricing-card">
           <div class="pricing-copy">
             <span class="eyebrow">订阅支持</span>
             <h3>风花雪月一笑而过，夜色迷离引人驻足。</h3>
             <p>
-              如果这些夜色、城市与人间也让你驻足，不妨继续读下去。
+              如果这些夜色、城市与人间也让你驻足，不妨继续读下去。<br>
               你会看到更深处的记录，还有更完整的夜色与人间。
             </p>
 

@@ -1,0 +1,918 @@
+---
+import { getCollection } from 'astro:content';
+import 'flag-icons/css/flag-icons.min.css';
+import ThemeToggle from '../components/ThemeToggle.astro';
+
+export const prerender = false;
+
+const currentUser = Astro.locals.user;
+
+const allPosts = await getCollection('travel');
+
+const posts = allPosts.sort((a, b) => {
+  return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+});
+
+const latestPosts = posts.slice(0, 6);
+
+const countriesMap = new Map();
+
+for (const post of posts) {
+  const key = post.data.country;
+  if (!countriesMap.has(key)) {
+    countriesMap.set(key, {
+      country: post.data.country,
+      countryCode: post.data.countryCode,
+      region: post.data.region,
+      count: 1,
+    });
+  } else {
+    countriesMap.get(key).count += 1;
+  }
+}
+
+const countries = Array.from(countriesMap.values()).sort((a, b) =>
+  a.country.localeCompare(b.country)
+);
+
+const freeCount = posts.filter((post) => post.data.tier === 'free').length;
+const paidCount = posts.filter((post) => post.data.tier === 'paid').length;
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>夜色风月 World X Trip 世界游记</title>
+    <meta
+      name="description"
+      content="白天看世界，夜晚看人间。记录全球夜色、人情与风花雪月的游记博客。"
+    />
+    <style>
+      :root {
+        --bg: #f8f3f8;
+        --bg-soft: #fcf7fc;
+        --panel: rgba(255, 255, 255, 0.7);
+        --panel-strong: rgba(255, 255, 255, 0.88);
+
+        --text: #20171f;
+        --muted: #7d6879;
+
+        --line: rgba(80, 42, 72, 0.10);
+        --line-strong: rgba(80, 42, 72, 0.16);
+
+        --accent: #b05c8e;
+        --accent-2: #d88cc8;
+        --accent-soft: rgba(176, 92, 142, 0.10);
+
+        --free-bg: #f3e8f7;
+        --free-text: #7a3d86;
+
+        --paid-bg: #fde7f1;
+        --paid-text: #b13b73;
+
+        --hero-shadow: 0 20px 60px rgba(113, 61, 104, 0.10);
+        --card-shadow: 0 12px 32px rgba(113, 61, 104, 0.08);
+      }
+
+      :root[data-theme='dark'] {
+        --bg: #0c0b14;
+        --bg-soft: #131222;
+        --panel: rgba(18, 20, 34, 0.78);
+        --panel-strong: rgba(24, 27, 46, 0.92);
+
+        --text: #f7f2ff;
+        --muted: #b8a8d6;
+
+        --line: rgba(120, 104, 255, 0.18);
+        --line-strong: rgba(255, 79, 216, 0.26);
+
+        --accent: #ff4fd8;
+        --accent-2: #6ae2ff;
+        --accent-soft: rgba(255, 79, 216, 0.14);
+
+        --free-bg: rgba(106, 226, 255, 0.14);
+        --free-text: #8beaff;
+
+        --paid-bg: rgba(255, 79, 216, 0.14);
+        --paid-text: #ff8ee7;
+
+        --hero-shadow: 0 24px 64px rgba(0, 0, 0, 0.42);
+        --card-shadow: 0 14px 36px rgba(0, 0, 0, 0.30);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(255, 79, 216, 0.08), transparent 30%),
+          radial-gradient(circle at top right, rgba(106, 226, 255, 0.08), transparent 26%),
+          radial-gradient(circle at bottom center, rgba(120, 104, 255, 0.08), transparent 36%),
+          var(--bg);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .container {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 24px 88px;
+      }
+
+      .site-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 28px;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .back-link {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .back-link:hover {
+        color: var(--text);
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .brand-kicker {
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .brand-title {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.75fr);
+        gap: 24px;
+        margin-bottom: 28px;
+      }
+
+      .hero-main,
+      .hero-side,
+      .section-card,
+      .note-card,
+      .country-card,
+      .pricing-card,
+      .footer-card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: var(--card-shadow);
+      }
+
+      .hero-main {
+        border-radius: 28px;
+        padding: 40px 34px;
+        box-shadow: var(--hero-shadow);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 18px 0 16px;
+        font-size: clamp(42px, 6vw, 72px);
+        line-height: 0.96;
+        letter-spacing: -0.05em;
+        max-width: 10ch;
+      }
+
+      .hero-copy {
+        max-width: 68ch;
+        font-size: 17px;
+        line-height: 1.95;
+        color: var(--muted);
+        white-space: pre-line;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+        padding: 0 18px;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+      }
+
+      .button-primary {
+        background: var(--text);
+        color: var(--bg);
+        border: 1px solid transparent;
+      }
+
+      .button-primary:hover {
+        box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.18), 0 0 20px rgba(255, 79, 216, 0.12);
+      }
+
+      .button-secondary {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--line-strong);
+      }
+
+      .hero-meta {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 30px;
+      }
+
+      .stat {
+        padding: 16px 16px 14px;
+        border-radius: 20px;
+        background: var(--panel-strong);
+        border: 1px solid var(--line);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 28px;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        margin-bottom: 8px;
+      }
+
+      .stat span {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .hero-side {
+        border-radius: 28px;
+        padding: 28px 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .hero-side h2 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: -0.03em;
+      }
+
+      .hero-side p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.8;
+        font-size: 15px;
+        text-align: justify;
+      }
+
+      .tier-guide {
+        display: grid;
+        gap: 14px;
+      }
+
+      .tier-item {
+        padding: 16px 16px 14px;
+        border-radius: 18px;
+        background: var(--panel-strong);
+        border: 1px solid var(--line);
+      }
+
+      .tier-label {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+
+      .tier-label.free {
+        background: var(--free-bg);
+        color: var(--free-text);
+      }
+
+      .tier-label.paid {
+        background: var(--paid-bg);
+        color: var(--paid-text);
+      }
+
+      .section {
+        margin-top: 26px;
+      }
+
+      .section-card {
+        border-radius: 28px;
+        padding: 28px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+      }
+
+      .section-title {
+        margin: 0;
+        font-size: 30px;
+        letter-spacing: -0.04em;
+      }
+
+      .section-desc {
+        margin: 8px 0 0;
+        color: var(--muted);
+        max-width: 62ch;
+        line-height: 1.8;
+      }
+
+      .countries-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .country-card {
+        border-radius: 22px;
+        padding: 20px 18px;
+        text-decoration: none;
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .country-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--line-strong);
+        box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.12), 0 10px 30px rgba(106, 226, 255, 0.06);
+      }
+
+      .country-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+
+      .country-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 18px;
+      }
+
+      .country-meta {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .country-count {
+        font-size: 12px;
+        color: var(--muted);
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+      }
+
+      .notes-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .note-card {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 18px;
+        border-radius: 24px;
+        overflow: hidden;
+        padding: 16px;
+        min-height: 220px;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      }
+
+      .note-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--line-strong);
+        box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.12), 0 10px 30px rgba(106, 226, 255, 0.06);
+      }
+
+      .note-cover {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        /* min-height: 188px; */
+        border-radius: 20px;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.06);
+      }
+
+      .note-cover img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .note-cover.placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 13px;
+        border: 1px dashed var(--line-strong);
+        background: transparent;
+      }
+
+      .note-body {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .note-topline {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .badge.free {
+        background: var(--free-bg);
+        color: var(--free-text);
+      }
+
+      .badge.paid {
+        background: var(--paid-bg);
+        color: var(--paid-text);
+      }
+
+      .note-location {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .note-title {
+        font-size: 28px;
+        line-height: 1.15;
+        letter-spacing: -0.04em;
+        margin: 0 0 12px;
+      }
+
+      .note-summary {
+        color: var(--muted);
+        line-height: 1.85;
+        font-size: 15px;
+        margin: 0 0 16px;
+      }
+
+      .note-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-top: auto;
+        flex-wrap: wrap;
+      }
+
+      .note-date {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .note-link {
+        text-decoration: none;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .pricing-card {
+        border-radius: 28px;
+        padding: 30px 28px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+        gap: 24px;
+      }
+
+      .pricing-copy h3 {
+        margin: 0 0 12px;
+        font-size: 32px;
+        letter-spacing: -0.04em;
+      }
+
+      .pricing-copy p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.85;
+      }
+
+      .pricing-points {
+        display: grid;
+        gap: 12px;
+      }
+
+      .pricing-point {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: var(--panel-strong);
+        border: 1px solid var(--line);
+        color: var(--text);
+        line-height: 1.7;
+      }
+
+      .footer-card {
+        margin-top: 26px;
+        border-radius: 24px;
+        padding: 24px 26px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .footer-copy {
+        color: var(--muted);
+        line-height: 1.8;
+        font-size: 14px;
+        max-width: 100ch;
+      }
+
+      .footer-nav {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .footer-nav a {
+        text-decoration: none;
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .fi {
+        border-radius: 2px;
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+      }
+
+      @media (max-width: 1024px) {
+        .hero,
+        .pricing-card,
+        .notes-grid,
+        .countries-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .note-card {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .container {
+          padding: 20px 16px 64px;
+        }
+
+        .hero-main,
+        .hero-side,
+        .section-card,
+        .pricing-card,
+        .footer-card {
+          border-radius: 22px;
+          padding: 22px 18px;
+        }
+
+        h1 {
+          max-width: none;
+        }
+
+        .hero-meta {
+          grid-template-columns: 1fr;
+        }
+
+        .note-title {
+          font-size: 24px;
+        }
+
+        .section-title {
+          font-size: 26px;
+        }
+
+        .pricing-copy h3 {
+          font-size: 28px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="site-header">
+        <div class="brand">
+          <span class="brand-kicker">多情自古伤离别 / 便纵有千种风情 / 更与何人说</span>
+          <div class="brand-title">白天看世界，夜晚看人间</div>
+        </div>
+
+        <div class="header-actions">
+          <a class="back-link" href={currentUser ? '/account' : '/login'}>
+            {currentUser ? '我的账户' : '会员登录'}
+          </a>
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-main">
+          <span class="eyebrow">风月无边 / 夜色档案</span>
+          <h1>愿天上人间<br>占得欢娱<br>
+            年年今夜</h1>
+          <p class="hero-copy">我走过世界上不少地方。
+白天有白天的秩序，夜晚有夜晚的语言。
+
+有些人偏爱山河古迹，有些人钟情街头美食，
+而我，更容易被一座城市入夜后的气息吸引。
+
+为了夜色，为了欲望，为了那些带着温度、香气、谎言与真心的话语，
+我想走进世界的另一面，
+看一看，
+一座城市如何在夜里呼吸，
+一个地方如何安放欲望，
+一个过客又如何在风月之中，看见人性、孤独、繁华与幻灭。
+
+自诩风流。
+若未曾见过那些五光十色、暧昧浮沉的夜色，
+只在规矩与想象里老去，未免太辜负此生。</p>
+
+          <div class="hero-actions">
+            <a class="button button-primary" href="#latest">阅读最新内容</a>
+            <a class="button button-secondary" href="/pricing">查看订阅方案</a>
+          </div>
+
+          <div class="hero-meta">
+            <div class="stat">
+              <strong>{posts.length}</strong>
+              <span>篇旅行记录</span>
+            </div>
+            <div class="stat">
+              <strong>{countries.length}</strong>
+              <span>个国家 / 地区</span>
+            </div>
+            <div class="stat">
+              <strong>{freeCount}/{paidCount}</strong>
+              <span>免费 / 付费内容</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-side">
+          <div>
+            <h2>World X Trip</h2>
+            <p>
+              白天的城市属于秩序，夜晚的城市属于故事。这里记录的，是关于城市、身体、情绪、欲望与暧昧的故事。是世界各地风俗街区与夜生活空间中的见闻与感受。
+              有些文章免费开放，有些更完整的长文，则作为付费内容保留。
+            </p>
+            <br />
+            <h2>建站初衷</h2>
+            <p>
+              食色性也，男欢女爱，人之大欲存焉。世界那么大，夜生活却从不雷同。不同城市、不同文化、不同制度，对于欲望的安放方式，往往比白天的观光景点更有意思。
+            <!-- </p>
+            <p> -->
+              做这个站，并不只是为了猎奇，也不只是为了寻欢。我更想把那些真实存在于世界各地的风月场，作为一种城市切片记录下来：让人知道那里的价格与规则。
+            <!-- </p>  
+            <p> -->
+              作为长期存在于不同文明与社会结构之中，人类历史上最古老的行业之一，如果改用一个现代视角去看，这个行业的价格、形态、密度与氛围，其实常常能折射出当地的经济状况、消费水平与社会情绪。所以这里写的，不只是风花雪月，也是另一种意义上的城市观察。
+            </p>
+            <p><br>不过，当下寻欢也是很重要的</p>
+            <p>人生得意须尽欢，莫使金樽空对月。</p>
+          </div>
+
+          <div class="tier-guide">
+            <div class="tier-item">
+              <span class="tier-label free">免费</span>
+              <p>
+                开放部分夜游见闻与城市观察，适合初次进入这个世界的读者。
+              </p>
+            </div>
+
+            <div class="tier-item">
+              <span class="tier-label paid">付费</span>
+              <p>
+                更完整的风月故事、更深入的场所记录，以及那些不适合只写成摘要的夜色片段。
+              </p>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section">
+        <div class="section-card">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">按国家/地区浏览</h2>
+              <!-- <p class="section-desc">
+                每个国家页都像一个小型专题页。比起按时间线堆叠内容，这种方式更适合沉淀旅行记忆，
+                也更适合后续不断补充同一地点的不同记录。
+              </p> -->
+            </div>
+          </div>
+
+          <div class="countries-grid">
+            {countries.map((item) => (
+              <a
+                class="country-card"
+                href={`/country/${item.country.toLowerCase().replaceAll(' ', '-')}`}
+              >
+                <div class="country-top">
+                  <div class="country-name">
+                    {item.countryCode ? (
+                      <span class={`fi fi-${item.countryCode.toLowerCase()}`}></span>
+                    ) : (
+                      <span>🏳️</span>
+                    )}
+                    <span>{item.country}</span>
+                  </div>
+                  <span class="country-count">{item.count} 篇</span>
+                </div>
+
+                <div class="country-meta">
+                  <div>{item.region}</div>
+                  <div>进入国家页 →</div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="latest">
+        <div class="section-card">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">最新游记</h2>
+              <!-- <p class="section-desc">
+                首页像一个带有杂志感的入口：左侧封面，右侧标题与摘要，同时区分免费内容与付费内容。
+              </p> -->
+            </div>
+          </div>
+
+          <div class="notes-grid">
+            {latestPosts.map((post) => (
+              <article class="note-card">
+                {post.data.cover ? (
+                  <div class="note-cover">
+                    <img src={post.data.cover} alt={post.data.title} loading="lazy" />
+                  </div>
+                ) : (
+                  <div class="note-cover placeholder">暂无封面</div>
+                )}
+
+                <div class="note-body">
+                  <div class="note-topline">
+                    <span class={`badge ${post.data.tier}`}>
+                      {post.data.tier === 'free' ? '免费' : '付费'}
+                    </span>
+                    <span class="note-location">
+                      {post.data.countryCode ? (
+                        <span class={`fi fi-${post.data.countryCode.toLowerCase()}`}></span>
+                      ) : (
+                        <span>🏳️</span>
+                      )}
+                      <span style="margin-left: 8px;">
+                        {post.data.country} · {post.data.region}
+                      </span>
+                    </span>
+                  </div>
+
+                  <h3 class="note-title">{post.data.title}</h3>
+                  <p class="note-summary">{post.data.summary}</p>
+
+                  <div class="note-footer">
+                    <span class="note-date">
+                      {new Date(post.data.date).toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </span>
+                    <a
+                      class="note-link"
+                      href={`/country/${post.data.country.toLowerCase().replaceAll(' ', '-')}#${post.data.slug}`}
+                    >
+                      打开文章 →
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="pricing-card">
+          <div class="pricing-copy">
+            <span class="eyebrow">订阅支持</span>
+            <h3>风花雪月一笑而过，夜色迷离引人驻足。</h3>
+            <p>
+              如果这些夜色、城市与人间也让你驻足，不妨继续读下去。
+              你会看到更深处的记录，还有更完整的夜色与人间。
+            </p>
+
+            <div class="hero-actions">
+              <a class="button button-primary" href="/pricing">查看订阅</a>
+            </div>
+          </div>
+
+          <div class="pricing-points">
+            <div class="pricing-point">有美人兮，见之不忘。一日不见兮，思之如狂。</div>
+            <div class="pricing-point">玉炉冰簟鸳鸯锦，粉融香汗流山枕。</div>
+            <div class="pricing-point">金风玉露一相逢，便胜却人间无数。</div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer-card">
+        <div class="footer-copy">
+          千金难买好时光，与其纠结不如纵狂，呼朋引伴、举杯同乐、销尽万古愁思肠。若得此生常尽兴，不羡长生不羡仙！
+        </div>
+
+        <nav class="footer-nav">
+          <a href="/">首页</a>
+          <a href="/pricing">订阅</a>
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>
