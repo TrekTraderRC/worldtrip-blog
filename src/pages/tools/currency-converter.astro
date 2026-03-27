@@ -1,0 +1,414 @@
+---
+import ThemeToggle from '../../components/ThemeToggle.astro';
+import CurrencyConverterTool from '../../components/CurrencyConverterTool.jsx';
+
+export const prerender = false;
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>汇率换算小工具 | 夜色风月 World X Trip</title>
+    <meta
+      name="description"
+      content="旅行途中随手使用的实时参考汇率换算工具，支持中文和英文国家名。"
+    />
+    <style is:global>
+      :root {
+        --bg: #f8f3f8;
+        --bg-soft: #fcf7fc;
+        --panel: rgba(255, 255, 255, 0.7);
+        --panel-strong: rgba(255, 255, 255, 0.88);
+        --text: #20171f;
+        --muted: #7d6879;
+        --line: rgba(80, 42, 72, 0.10);
+        --line-strong: rgba(80, 42, 72, 0.16);
+        --accent: #b05c8e;
+        --accent-2: #d88cc8;
+        --accent-soft: rgba(176, 92, 142, 0.10);
+        --hero-shadow: 0 20px 60px rgba(113, 61, 104, 0.10);
+        --card-shadow: 0 12px 32px rgba(113, 61, 104, 0.08);
+      }
+
+      :root[data-theme='dark'] {
+        --bg: #0c0b14;
+        --bg-soft: #131222;
+        --panel: rgba(18, 20, 34, 0.78);
+        --panel-strong: rgba(24, 27, 46, 0.92);
+        --text: #f7f2ff;
+        --muted: #b8a8d6;
+        --line: rgba(120, 104, 255, 0.18);
+        --line-strong: rgba(255, 79, 216, 0.26);
+        --accent: #ff4fd8;
+        --accent-2: #6ae2ff;
+        --accent-soft: rgba(255, 79, 216, 0.14);
+        --hero-shadow: 0 24px 64px rgba(0, 0, 0, 0.42);
+        --card-shadow: 0 14px 36px rgba(0, 0, 0, 0.30);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        font-family: Inter, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(255, 79, 216, 0.08), transparent 30%),
+          radial-gradient(circle at top right, rgba(106, 226, 255, 0.08), transparent 26%),
+          radial-gradient(circle at bottom center, rgba(120, 104, 255, 0.08), transparent 36%),
+          var(--bg);
+      }
+
+      a { color: inherit; }
+
+      .container {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 24px 88px;
+      }
+
+      .site-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 28px;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .back-link {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .back-link:hover { color: var(--text); }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .brand-kicker {
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .brand-title {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .hero-main,
+      .section-card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: var(--card-shadow);
+      }
+
+      .hero-main {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px;
+        padding: 40px 34px;
+        box-shadow: var(--hero-shadow);
+        margin-bottom: 26px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 18px 0 14px;
+        font-size: clamp(32px, 4.8vw, 56px);
+        line-height: 1.02;
+        letter-spacing: -0.05em;
+      }
+
+      .hero-copy {
+        max-width: 68ch;
+        font-size: 16px;
+        line-height: 1.75;
+        color: var(--muted);
+        white-space: pre-line;
+      }
+
+      .section-card {
+        border-radius: 28px;
+        padding: 28px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+      }
+
+      .section-title {
+        margin: 0;
+        font-size: 30px;
+        letter-spacing: -0.04em;
+      }
+
+      .section-desc {
+        margin: 8px 0 0;
+        color: var(--muted);
+        max-width: none;
+        line-height: 1.8;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+        padding: 0 18px;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+        cursor: pointer;
+      }
+
+      .button:hover { transform: translateY(-1px); }
+
+      .button-primary {
+        background: var(--text);
+        color: var(--bg);
+        border: 1px solid transparent;
+      }
+
+      .button-primary:hover {
+        box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.18), 0 0 20px rgba(255, 79, 216, 0.12);
+      }
+
+      .tool-stack {
+        display: grid;
+        gap: 26px;
+      }
+
+      .converter-top-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .converter-card {
+        border-radius: 22px;
+        padding: 20px 18px;
+        border: 1px solid var(--line);
+        background: var(--panel-strong);
+      }
+
+      .converter-card-code {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .converter-card-label {
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 16px;
+      }
+
+      .converter-card-value {
+        font-size: 34px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+
+      .converter-inline-note,
+      .converter-api-note,
+      .converter-message {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .converter-top-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+
+      .tool-refresh,
+      .tool-delete {
+        border: 1px solid var(--line-strong);
+        background: transparent;
+        color: var(--text);
+        border-radius: 999px;
+        padding: 10px 14px;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .tool-refresh:hover,
+      .tool-delete:hover {
+        background: var(--accent-soft);
+      }
+
+      .converter-table {
+        display: grid;
+        gap: 12px;
+      }
+
+      .converter-table-head,
+      .converter-row {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1.6fr 1.4fr 0.9fr;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .converter-table-head {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0 8px;
+      }
+
+      .converter-row {
+        padding: 12px;
+        border-radius: 20px;
+        border: 1px solid var(--line);
+        background: var(--panel-strong);
+      }
+
+      .tool-input {
+        width: 100%;
+        min-height: 46px;
+        border-radius: 14px;
+        border: 1px solid var(--line-strong);
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--text);
+        padding: 0 14px;
+        font: inherit;
+        outline: none;
+      }
+
+      :root[data-theme='dark'] .tool-input {
+        background: rgba(255,255,255,0.04);
+      }
+
+      .tool-input-readonly {
+        color: var(--muted);
+      }
+
+      .converter-row-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+      }
+
+      .tool-loading {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .tool-add-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 14px;
+      }
+
+      @media (max-width: 1024px) {
+        .converter-top-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .converter-table-head {
+          display: none;
+        }
+
+        .converter-row {
+          grid-template-columns: 1fr;
+        }
+
+        .converter-row-actions {
+          align-items: flex-start;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .container {
+          padding: 20px 16px 64px;
+        }
+
+        .hero-main,
+        .section-card {
+          border-radius: 22px;
+          padding: 22px 18px;
+        }
+
+        .tool-add-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <header class="site-header">
+        <div class="brand">
+          <span class="brand-kicker"> 
+            <a href="/tools/currency-converter" style="text-decoration:none;">小工具：汇率换算</a>
+          </span>
+          <div class="brand-title">对比各地风月花销，方便寻找性价比最佳的目的地。</div>
+        </div>
+
+        <div class="header-actions">
+          <a class="back-link" href="/">← 返回首页</a>
+          <span class="back-link">· 汇率换算</span>
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <section class="hero-main">
+        <span class="eyebrow">Travel Tool / Currency</span>
+        <h1>旅途之中，<br />钱也要算明白。</h1>
+        <!-- <p class="hero-copy">          
+          输入国家名，自动识别货币；输入当地金额，立刻换算成你熟悉的参考货币。
+        </p> -->
+      </section>
+
+      <CurrencyConverterTool client:load />
+    </div>
+  </body>
+</html>

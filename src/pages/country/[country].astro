@@ -402,6 +402,32 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
         border-top: 1px solid var(--line);
       }
 
+      .post-collapse-wrap {
+        display: flex;
+        justify-content: center;
+        margin-top: 28px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+
+      .post-collapse-btn {
+        border: 0;
+        background: transparent;
+        color: var(--accent);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 999px;
+        transition: background 0.18s ease, transform 0.18s ease, color 0.18s ease;
+      }
+
+      .post-collapse-btn:hover {
+        background: var(--accent-soft);
+        transform: translateY(-1px);
+      }
+
       .prose {
         max-width: 72ch;
         font-size: 17px;
@@ -720,6 +746,16 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
                   <article class="prose">
                     <Content />
                   </article>
+
+                  <div class="post-collapse-wrap">
+                    <button
+                      type="button"
+                      class="post-collapse-btn"
+                      data-collapse-target={post.data.slug}
+                    >
+                      收起全文 ↑
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div class="post-body">
@@ -742,6 +778,16 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
                       )}
                       <a class="button button-secondary" href="/account">我的账户</a>
                     </div>
+
+                    <div class="post-collapse-wrap">
+                      <button
+                        type="button"
+                        class="post-collapse-btn"
+                        data-collapse-target={post.data.slug}
+                      >
+                        收起摘要 ↑
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -752,7 +798,7 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
         <aside class="sidebar">
           <h3>本页目录</h3>
           <p>
-            快速浏览当前国家下的全部内容。等文章数量增多后，这里会更实用。
+            快速浏览当前国家下的全部内容。
           </p>
 
           <ul>
@@ -770,6 +816,7 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
       window.addEventListener('DOMContentLoaded', () => {
         const buttons = document.querySelectorAll('.filter-btn');
         const cards = document.querySelectorAll('.post-card');
+        const collapseButtons = document.querySelectorAll('.post-collapse-btn');
 
         buttons.forEach((button) => {
           button.addEventListener('click', () => {
@@ -786,6 +833,25 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
               } else {
                 card.style.display = 'none';
               }
+            });
+          });
+        });
+
+        collapseButtons.forEach((button) => {
+          button.addEventListener('click', () => {
+            const targetId = button.getAttribute('data-collapse-target');
+            if (!targetId) return;
+
+            const card = document.getElementById(targetId);
+            if (!card) return;
+
+            card.removeAttribute('open');
+
+            requestAnimationFrame(() => {
+              card.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+              });
             });
           });
         });
