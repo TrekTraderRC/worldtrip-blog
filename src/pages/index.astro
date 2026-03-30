@@ -800,6 +800,16 @@ const collectionProgress = Math.round((unlockedCollectionCount / totalCollection
         color: var(--accent);
       }
 
+      .collection-entry-link {
+        text-decoration: none;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
+
+      .collection-entry-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.12), 0 8px 24px rgba(106, 226, 255, 0.08);
+      }
+
       .collection-card {
         border-radius: 28px;
         padding: 28px;
@@ -1464,7 +1474,7 @@ const collectionProgress = Math.round((unlockedCollectionCount / totalCollection
         <div class="collection-card">
           <div class="collection-head">
             <div>
-              <span class="eyebrow">夜色图鉴 / Collection</span>
+              <a class="eyebrow collection-entry-link" href="/collection">夜色图鉴 / Collection</a>
               <h2 class="collection-title">生肖 × 星座</h2>
               <p class="collection-desc">
                 夜色易散，人影难忘，相遇是缘，聚散无常。
