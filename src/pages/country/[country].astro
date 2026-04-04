@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import 'flag-icons/css/flag-icons.min.css';
 import ThemeToggle from '../../components/ThemeToggle.astro';
+import { countries } from '../../data/countries';
 
 export const prerender = false;
 
@@ -19,9 +20,16 @@ if (countryPosts.length === 0) {
   return new Response('Not found', { status: 404 });
 }
 
-const countryName = countryPosts[0].data.country;
+const countryConfig = country
+  ? countries[country as keyof typeof countries]
+  : undefined;
+
+const countryName = countryConfig?.name ?? countryPosts[0].data.country;
 const countryCode = countryPosts[0].data.countryCode;
-const region = countryPosts[0].data.region;
+const region = countryConfig?.region ?? countryPosts[0].data.region;
+const countryDescription =
+  countryConfig?.description ??
+  '这里收录这个国家/地区下的旅行记录与城市片段。';
 
 const currentUser = Astro.locals.user;
 const hasPaidAccess = Astro.locals.hasPaidAccess;
@@ -660,11 +668,7 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
               )}
               <span style="margin-left: 12px;">{countryName}</span>
             </h1>
-            <p class="hero-subtitle">
-              同一个国家，不同的城市，不一样的面孔。
-              有人记住白天的风景，有人记住夜里的灯火。
-              这里把那些分散在不同时刻的见闻、情绪与体感，重新放在一起。
-            </p>
+            <p class="hero-subtitle">{countryDescription}</p>
 
             <div class="hero-stats">
               <span class="hero-stat">{region}</span>

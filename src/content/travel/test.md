@@ -1,9 +1,9 @@
 ---
 title: "Test Post"
 slug: "test-post"
-country: "Testland"
+country: "Sexyland"
 countryCode: "UN"
-region: "Test Region"
+region: "Sexy Region"
 date: 2025-01-01
 tier: "free"
 summary: "This is a test post."
