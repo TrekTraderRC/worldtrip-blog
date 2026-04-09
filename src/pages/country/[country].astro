@@ -27,9 +27,8 @@ const countryConfig = country
 const countryName = countryConfig?.name ?? countryPosts[0].data.country;
 const countryCode = countryPosts[0].data.countryCode;
 const region = countryConfig?.region ?? countryPosts[0].data.region;
-const countryDescription =
-  countryConfig?.description ??
-  '这里收录这个国家/地区下的旅行记录与城市片段。';
+const countryDescription = countryConfig?.description ?? '这里收录这个国家/地区下的旅行记录与城市片段。';
+const icon = countryPosts[0]?.data.icon;
 
 const currentUser = Astro.locals.user;
 const hasPaidAccess = Astro.locals.hasPaidAccess;
@@ -663,8 +662,10 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
             <h1>
               {countryCode ? (
                 <span class={`fi fi-${countryCode.toLowerCase()}`}></span>
+              ) : icon ? (
+                <span>{icon}</span>
               ) : (
-                <span>🏳️</span>
+                <span>🌏</span>
               )}
               <span style="margin-left: 12px;">{countryName}</span>
             </h1>
@@ -714,17 +715,15 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
                     <div class="post-meta">
                       {post.data.countryCode ? (
                         <span class={`fi fi-${post.data.countryCode.toLowerCase()}`}></span>
+                      ) : post.data.icon ? (
+                        <span>{post.data.icon}</span>
                       ) : (
-                        <span>🏳️</span>
+                        <span>🌏</span>
                       )}
                       <span>{post.data.country} · {post.data.region}</span>
                       <span>·</span>
                       <span>
-                        {new Date(post.data.date).toLocaleDateString('zh-CN', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                        {`${new Date(post.data.date).getFullYear()}年${new Date(post.data.date).getMonth() + 1}月`}
                       </span>
                     </div>
 

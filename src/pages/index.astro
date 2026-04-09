@@ -1530,9 +1530,13 @@ const collectionProgress = Math.round((unlockedCollectionCount / totalCollection
                 <span class="note-location">
                   {featuredPost.data.countryCode ? (
                     <span class={`fi fi-${featuredPost.data.countryCode.toLowerCase()}`}></span>
+                  ) : featuredPost.data.icon ? (
+                    <span>{featuredPost.data.icon}</span>
                   ) : (
-                    <span>🏳️</span>
+                    <span>🌏</span>
                   )}
+
+                  
                   <span style="margin-left: 8px;">
                     {featuredPost.data.country} · {featuredPost.data.region}
                   </span>
@@ -1544,11 +1548,7 @@ const collectionProgress = Math.round((unlockedCollectionCount / totalCollection
 
               <div class="featured-post-footer">
                 <span class="featured-post-date">
-                  {new Date(featuredPost.data.date).toLocaleDateString('zh-CN', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
+                  {`${new Date(featuredPost.data.date).getFullYear()}年${new Date(featuredPost.data.date).getMonth() + 1}月`}
                 </span>
 
                 <a
@@ -1581,8 +1581,10 @@ const collectionProgress = Math.round((unlockedCollectionCount / totalCollection
                   <div class="country-name">
                     {item.countryCode ? (
                       <span class={`fi fi-${item.countryCode.toLowerCase()}`}></span>
+                    ) : item.icon ? (
+                      <span>{item.icon}</span>
                     ) : (
-                      <span>🏳️</span>
+                      <span>🌏</span>
                     )}
                     <span>{item.country}</span>
                   </div>
@@ -1626,9 +1628,12 @@ const collectionProgress = Math.round((unlockedCollectionCount / totalCollection
                     <span class="note-location">
                       {post.data.countryCode ? (
                         <span class={`fi fi-${post.data.countryCode.toLowerCase()}`}></span>
+                      ) : post.data.icon ? (
+                        <span>{post.data.icon}</span>
                       ) : (
-                        <span>🏳️</span>
+                        <span>🌏</span>
                       )}
+
                       <span style="margin-left: 8px;">
                         {post.data.country} · {post.data.region}
                       </span>
@@ -1640,11 +1645,7 @@ const collectionProgress = Math.round((unlockedCollectionCount / totalCollection
 
                   <div class="note-footer">
                     <span class="note-date">
-                      {new Date(post.data.date).toLocaleDateString('zh-CN', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
+                      {`${new Date(post.data.date).getFullYear()}年${new Date(post.data.date).getMonth() + 1}月`}
                     </span>
                     <a
                       class="note-link"
