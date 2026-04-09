@@ -1,0 +1,74 @@
+---
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  forceTheme?: 'light' | 'dark';
+  pageClass?: string;
+}
+
+const {
+  title = '夜色风月 | Amorous Planet | World X Trip 世界游记',
+  description = '白天看世界，夜晚看人间。记录全球的夜色、人情与风花雪月。',
+  forceTheme,
+  pageClass = '',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN" data-theme={forceTheme ?? 'light'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <script is:inline define:vars={{ forceTheme }}>
+        if (forceTheme === 'light' || forceTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', forceTheme);
+        }
+    </script>
+    <slot name="head" />
+  </head>
+  <body class={pageClass}>
+    <SiteHeader forceTheme={forceTheme} />
+    <main>
+      <slot />
+    </main>
+    <SiteFooter forceTheme={forceTheme} />
+  </body>
+</html>
+
+<style is:global>
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  body {
+    font-family: Inter, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+    background: var(--bg, #f8f3f8);
+    color: var(--text, #20171f);
+  }
+
+  main {
+    min-height: 60vh;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+</style>

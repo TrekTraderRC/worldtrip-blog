@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import 'flag-icons/css/flag-icons.min.css';
-import ThemeToggle from '../../components/ThemeToggle.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 import { countries } from '../../data/countries';
 
 export const prerender = false;
@@ -47,15 +47,11 @@ const freeCount = countryPosts.filter((post) => post.data.tier === 'free').lengt
 const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').length;
 ---
 
-<html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>{countryName} - 世界游记</title>
-    <meta
-      name="description"
-      content={`${countryName} 的夜生活游记、长文记录与付费内容归档。`}
-    />
+<BaseLayout
+  title={`${countryName} - 世界游记`}
+  description={`${countryName} 的夜生活游记、长文记录与付费内容归档。`}
+>
+  <Fragment slot="head">
     <style>
       :root {
         --bg: #f8f3f8;
@@ -136,31 +132,6 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
         max-width: 1240px;
         margin: 0 auto;
         padding: 24px 24px 88px;
-      }
-
-      .site-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-        margin-bottom: 22px;
-      }
-
-      .header-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .back-link {
-        text-decoration: none;
-        color: var(--muted);
-        font-size: 14px;
-        font-weight: 600;
-      }
-
-      .back-link:hover {
-        color: var(--text);
       }
 
       .hero {
@@ -495,7 +466,7 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
 
       .sidebar {
         position: sticky;
-        top: 24px;
+        top: 96px;
         border-radius: 24px;
         padding: 22px 18px;
       }
@@ -641,114 +612,135 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
         }
       }
     </style>
-  </head>
-  <body>
-    <div class="container">
-      <header class="site-header">
-        <a class="back-link" href="/">← 返回首页</a>
+  </Fragment>
 
-        <div class="header-actions">
-          <a class="back-link" href={currentUser ? '/account' : '/login'}>
-            {currentUser ? '我的账户' : '登录 / 注册'}
-          </a>
-          <ThemeToggle />
-        </div>
-      </header>
+  <div class="container">
+    <section class="hero">
+      <div class="hero-top">
+        <div class="hero-copy">
+          <span class="hero-kicker">国家/地区归档页</span>
+          <h1>
+            {countryCode ? (
+              <span class={`fi fi-${countryCode.toLowerCase()}`}></span>
+            ) : icon ? (
+              <span>{icon}</span>
+            ) : (
+              <span>🌏</span>
+            )}
+            <span style="margin-left: 12px;">{countryName}</span>
+          </h1>
+          <p class="hero-subtitle">{countryDescription}</p>
 
-      <section class="hero">
-        <div class="hero-top">
-          <div class="hero-copy">
-            <span class="hero-kicker">国家/地区归档页</span>
-            <h1>
-              {countryCode ? (
-                <span class={`fi fi-${countryCode.toLowerCase()}`}></span>
-              ) : icon ? (
-                <span>{icon}</span>
-              ) : (
-                <span>🌏</span>
-              )}
-              <span style="margin-left: 12px;">{countryName}</span>
-            </h1>
-            <p class="hero-subtitle">{countryDescription}</p>
-
-            <div class="hero-stats">
-              <span class="hero-stat">{region}</span>
-              <span class="hero-stat">{countryPosts.length} 篇内容</span>
-              <span class="hero-stat">{freeCount} 篇免费</span>
-              <span class="hero-stat">{paidCount} 篇付费</span>
-              <span class="hero-stat">
-                {hasPaidAccess ? '会员访问已开启' : currentUser ? '当前账号未解锁付费内容' : '未登录'}
-              </span>
-            </div>
-          </div>
-
-          <div class="filter-bar">
-            <button class="filter-btn active" data-filter="all" type="button">全部</button>
-            <button class="filter-btn" data-filter="free" type="button">免费</button>
-            <button class="filter-btn" data-filter="paid" type="button">付费</button>
+          <div class="hero-stats">
+            <span class="hero-stat">{region}</span>
+            <span class="hero-stat">{countryPosts.length} 篇内容</span>
+            <span class="hero-stat">{freeCount} 篇免费</span>
+            <span class="hero-stat">{paidCount} 篇付费</span>
+            <span class="hero-stat">
+              {hasPaidAccess ? '会员访问已开启' : currentUser ? '当前账号未解锁付费内容' : '未登录'}
+            </span>
           </div>
         </div>
-      </section>
 
-      <div class="layout">
-        <main class="main-column">
-          {renderedPosts.map(({ post, Content }) => (
-            <details class="post-card" id={post.data.slug} data-tier={post.data.tier}>
-              <summary class="post-summary">
-                <div class="post-header">
-                  {post.data.cover ? (
-                    <div class="post-cover">
-                      <img src={post.data.cover} alt={post.data.title} loading="lazy" />
-                    </div>
-                  ) : (
-                    <div class="post-cover placeholder">暂无封面</div>
-                  )}
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="all" type="button">全部</button>
+          <button class="filter-btn" data-filter="free" type="button">免费</button>
+          <button class="filter-btn" data-filter="paid" type="button">付费</button>
+        </div>
+      </div>
+    </section>
 
-                  <div class="post-info">
-                    <div class="post-title-row">
-                      <div class="post-title">{post.data.title}</div>
-                      <span class={`badge ${post.data.tier}`}>
-                        {post.data.tier === 'free' ? '免费' : '付费'}
-                      </span>
-                    </div>
+    <div class="layout">
+      <main class="main-column">
+        {renderedPosts.map(({ post, Content }) => (
+          <details class="post-card" id={post.data.slug} data-tier={post.data.tier}>
+            <summary class="post-summary">
+              <div class="post-header">
+                {post.data.cover ? (
+                  <div class="post-cover">
+                    <img src={post.data.cover} alt={post.data.title} loading="lazy" />
+                  </div>
+                ) : (
+                  <div class="post-cover placeholder">暂无封面</div>
+                )}
 
-                    <div class="post-meta">
-                      {post.data.countryCode ? (
-                        <span class={`fi fi-${post.data.countryCode.toLowerCase()}`}></span>
-                      ) : post.data.icon ? (
-                        <span>{post.data.icon}</span>
-                      ) : (
-                        <span>🌏</span>
-                      )}
-                      <span>{post.data.country} · {post.data.region}</span>
-                      <span>·</span>
-                      <span>
-                        {`${new Date(post.data.date).getFullYear()}年${new Date(post.data.date).getMonth() + 1}月`}
-                      </span>
-                    </div>
+                <div class="post-info">
+                  <div class="post-title-row">
+                    <div class="post-title">{post.data.title}</div>
+                    <span class={`badge ${post.data.tier}`}>
+                      {post.data.tier === 'free' ? '免费' : '付费'}
+                    </span>
+                  </div>
 
-                    <div class="post-excerpt">
-                      {post.data.summary}
-                    </div>
+                  <div class="post-meta">
+                    {post.data.countryCode ? (
+                      <span class={`fi fi-${post.data.countryCode.toLowerCase()}`}></span>
+                    ) : post.data.icon ? (
+                      <span>{post.data.icon}</span>
+                    ) : (
+                      <span>🌏</span>
+                    )}
+                    <span>{post.data.country} · {post.data.region}</span>
+                    <span>·</span>
+                    <span>
+                      {`${new Date(post.data.date).getFullYear()}年${new Date(post.data.date).getMonth() + 1}月`}
+                    </span>
+                  </div>
 
-                    <div class="expand-tip">
-                      点击展开阅读 {
-                        post.data.tier === 'free'
+                  <div class="post-excerpt">
+                    {post.data.summary}
+                  </div>
+
+                  <div class="expand-tip">
+                    点击展开阅读 {
+                      post.data.tier === 'free'
+                        ? '全文'
+                        : hasPaidAccess
                           ? '全文'
-                          : hasPaidAccess
-                            ? '全文'
-                            : '摘要'
-                      } ↓
-                    </div>
+                          : '摘要'
+                    } ↓
                   </div>
                 </div>
-              </summary>
+              </div>
+            </summary>
 
-              {post.data.tier === 'free' || hasPaidAccess ? (
-                <div class="post-body">
-                  <article class="prose">
-                    <Content />
-                  </article>
+            {post.data.tier === 'free' || hasPaidAccess ? (
+              <div class="post-body">
+                <article class="prose">
+                  <Content />
+                </article>
+
+                <div class="post-collapse-wrap">
+                  <button
+                    type="button"
+                    class="post-collapse-btn"
+                    data-collapse-target={post.data.slug}
+                  >
+                    收起全文 ↑
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div class="post-body">
+                <div class="locked-box">
+                  <strong>
+                    {currentUser ? '当前内容需要有效会员权限' : '当前内容需要登录后查看会员状态'}
+                  </strong>
+
+                  <p>
+                    {currentUser
+                      ? '你已登录，但当前账号没有有效会员记录，暂时只能查看摘要。开通后将自动解锁完整正文。'
+                      : '这篇内容属于付费内容。请先登录，再根据你的会员状态自动判断是否解锁。'}
+                  </p>
+
+                  <div class="locked-actions">
+                    {!currentUser ? (
+                      <a class="button button-primary" href="/login">登录后查看</a>
+                    ) : (
+                      <a class="button button-primary" href="/pricing">前往订阅</a>
+                    )}
+                    <a class="button button-secondary" href="/account">我的账户</a>
+                  </div>
 
                   <div class="post-collapse-wrap">
                     <button
@@ -756,109 +748,76 @@ const paidCount = countryPosts.filter((post) => post.data.tier === 'paid').lengt
                       class="post-collapse-btn"
                       data-collapse-target={post.data.slug}
                     >
-                      收起全文 ↑
+                      收起摘要 ↑
                     </button>
                   </div>
                 </div>
-              ) : (
-                <div class="post-body">
-                  <div class="locked-box">
-                    <strong>
-                      {currentUser ? '当前内容需要有效会员权限' : '当前内容需要登录后查看会员状态'}
-                    </strong>
+              </div>
+            )}
+          </details>
+        ))}
+      </main>
 
-                    <p>
-                      {currentUser
-                        ? '你已登录，但当前账号没有有效会员记录，暂时只能查看摘要。开通后将自动解锁完整正文。'
-                        : '这篇内容属于付费内容。请先登录，再根据你的会员状态自动判断是否解锁。'}
-                    </p>
+      <aside class="sidebar">
+        <h3>本页目录</h3>
+        <p>
+          快速浏览当前国家下的全部内容。
+        </p>
 
-                    <div class="locked-actions">
-                      {!currentUser ? (
-                        <a class="button button-primary" href="/login">登录后查看</a>
-                      ) : (
-                        <a class="button button-primary" href="/pricing">前往订阅</a>
-                      )}
-                      <a class="button button-secondary" href="/account">我的账户</a>
-                    </div>
-
-                    <div class="post-collapse-wrap">
-                      <button
-                        type="button"
-                        class="post-collapse-btn"
-                        data-collapse-target={post.data.slug}
-                      >
-                        收起摘要 ↑
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </details>
+        <ul>
+          {countryPosts.map((post) => (
+            <li>
+              <a href={`#${post.data.slug}`}>{post.data.title}</a>
+            </li>
           ))}
-        </main>
-
-        <aside class="sidebar">
-          <h3>本页目录</h3>
-          <p>
-            快速浏览当前国家下的全部内容。
-          </p>
-
-          <ul>
-            {countryPosts.map((post) => (
-              <li>
-                <a href={`#${post.data.slug}`}>{post.data.title}</a>
-              </li>
-            ))}
-          </ul>
-        </aside>
-      </div>
+        </ul>
+      </aside>
     </div>
+  </div>
 
-    <script is:inline>
-      window.addEventListener('DOMContentLoaded', () => {
-        const buttons = document.querySelectorAll('.filter-btn');
-        const cards = document.querySelectorAll('.post-card');
-        const collapseButtons = document.querySelectorAll('.post-collapse-btn');
+  <script is:inline>
+    window.addEventListener('DOMContentLoaded', () => {
+      const buttons = document.querySelectorAll('.filter-btn');
+      const cards = document.querySelectorAll('.post-card');
+      const collapseButtons = document.querySelectorAll('.post-collapse-btn');
 
-        buttons.forEach((button) => {
-          button.addEventListener('click', () => {
-            const filter = button.getAttribute('data-filter');
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const filter = button.getAttribute('data-filter');
 
-            buttons.forEach((btn) => btn.classList.remove('active'));
-            button.classList.add('active');
+          buttons.forEach((btn) => btn.classList.remove('active'));
+          button.classList.add('active');
 
-            cards.forEach((card) => {
-              const tier = card.getAttribute('data-tier');
+          cards.forEach((card) => {
+            const tier = card.getAttribute('data-tier');
 
-              if (filter === 'all' || tier === filter) {
-                card.style.display = '';
-              } else {
-                card.style.display = 'none';
-              }
-            });
+            if (filter === 'all' || tier === filter) {
+              card.style.display = '';
+            } else {
+              card.style.display = 'none';
+            }
           });
         });
+      });
 
-        collapseButtons.forEach((button) => {
-          button.addEventListener('click', () => {
-            const targetId = button.getAttribute('data-collapse-target');
-            if (!targetId) return;
+      collapseButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const targetId = button.getAttribute('data-collapse-target');
+          if (!targetId) return;
 
-            const card = document.getElementById(targetId);
-            if (!card) return;
+          const card = document.getElementById(targetId);
+          if (!card) return;
 
-            card.removeAttribute('open');
+          card.removeAttribute('open');
 
-            requestAnimationFrame(() => {
-              card.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-              });
+          requestAnimationFrame(() => {
+            card.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
             });
           });
         });
       });
-    </script>
-  </body>
-</html>
+    });
+  </script>
+</BaseLayout>

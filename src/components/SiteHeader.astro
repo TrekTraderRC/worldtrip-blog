@@ -1,0 +1,168 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import NavbarMusic from './NavbarMusic.astro';
+
+interface Props {
+  forceTheme?: 'light' | 'dark';
+}
+
+const { forceTheme } = Astro.props;
+
+const currentUser = Astro.locals.user;
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { href: '/', label: '首页' },
+  { href: '/collection', label: '图鉴' },
+  { href: '/pricing', label: '订阅' },
+  { href: '/tools/currency-converter', label: '工具' },
+];
+---
+
+<header class:list={['global-header', forceTheme === 'dark' && 'force-dark']}>
+  <div class="global-header-inner">
+    <div class="global-brand">
+      <!-- <a class="brand-kicker" href="/tools/currency-converter">小工具：汇率换算</a> -->
+      <a class="brand-title" href="/">白天看世界，夜晚看人间</a>
+    </div>
+
+    <nav class="global-nav" aria-label="Main navigation">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class={`nav-link ${currentPath === item.href ? 'is-active' : ''}`}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="global-actions">
+      <NavbarMusic />
+      <a class="account-link" href={currentUser ? '/account' : '/login'}>
+        {currentUser ? '我的账户' : '会员登录'}
+      </a>
+      <ThemeToggle forceTheme={forceTheme} />
+    </div>
+  </div>
+</header>
+
+<style>
+  .global-header {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .global-header.force-dark {
+    background: rgba(8, 10, 20, 0.82);
+    border-bottom: 1px solid rgba(124, 156, 255, 0.14);
+  }
+
+  .global-header-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .global-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .brand-kicker {
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .brand-title {
+    text-decoration: none;
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .global-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-radius: 999px;
+    transition: 0.18s ease;
+  }
+
+  .nav-link:hover,
+  .nav-link.is-active {
+    color: var(--text);
+    background: var(--accent-soft);
+  }
+
+  .global-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .account-link {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .account-link:hover {
+    color: var(--text);
+  }
+
+  @media (max-width: 1080px) {
+    .global-header-inner {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+
+    .global-brand,
+    .global-actions {
+      justify-self: center;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .global-header-inner {
+      padding: 12px 16px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+    }
+
+    .global-actions {
+      gap: 10px;
+    }
+  }
+</style>

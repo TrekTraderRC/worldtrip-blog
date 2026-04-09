@@ -1,0 +1,162 @@
+---
+interface Props {
+  forceTheme?: 'light' | 'dark';
+}
+
+const { forceTheme } = Astro.props;
+---
+
+<footer class:list={['site-footer', forceTheme === 'dark' && 'force-dark']}>
+  <div class="site-footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h2>夜色风月 Amorous Planet</h2>
+        <p>
+          白天看世界，夜晚看人间。记录城市、夜色、情绪、欲望与暧昧。
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <div class="footer-col">
+          <h3>站点</h3>
+          <a href="/">首页</a>
+          <a href="/collection">图鉴</a>
+          <a href="/pricing">订阅</a>
+        </div>
+
+        <div class="footer-col">
+          <h3>账户</h3>
+          <a href="/login">登录</a>
+          <a href="/account">账户</a>
+          <a href="/subscribe">订阅页</a>
+        </div>
+
+        <div class="footer-col">
+          <h3>工具</h3>
+          <a href="/tools/currency-converter">汇率换算</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 夜色风月 | Amorous Planet | World X Trip. All rights reserved.</p>
+      <!-- <div class="footer-meta">
+        <a href="/">Privacy</a>
+        <a href="/">Terms</a>
+        <a href="/">Contact</a>
+      </div> -->
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 72px;
+    border-top: 1px solid var(--line);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--bg-soft) 72%, transparent), var(--bg));
+  }
+
+  .site-footer.force-dark {
+    border-top: 1px solid rgba(124, 156, 255, 0.14);
+    background:
+      linear-gradient(180deg, rgba(8, 10, 20, 0.92), rgba(5, 7, 13, 0.98));
+  }
+
+  .site-footer-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 42px 24px 24px;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 36px;
+    padding-bottom: 28px;
+  }
+
+  .footer-brand h2 {
+    margin: 0 0 10px;
+    font-size: 1.1rem;
+    color: var(--text);
+  }
+
+  .footer-brand p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 58ch;
+  }
+
+  .footer-links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .footer-col h3 {
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+
+  .footer-col a,
+  .footer-meta a {
+    display: inline-block;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 8px;
+  }
+
+  .footer-col a:hover,
+  .footer-meta a:hover {
+    color: var(--text);
+  }
+
+  .footer-bottom {
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .site-footer.force-dark .footer-bottom {
+    border-top: 1px solid rgba(124, 156, 255, 0.14);
+  }
+
+  .footer-bottom p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .footer-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 900px) {
+    .footer-top {
+      grid-template-columns: 1fr;
+    }
+
+    .footer-links {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .site-footer-inner {
+      padding: 36px 16px 22px;
+    }
+
+    .footer-links {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
