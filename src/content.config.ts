@@ -15,6 +15,7 @@ const travel = defineCollection({
     region: z.string(),
     icon: z.string().optional(),
     date: z.coerce.date(),
+    publishedAt: z.coerce.date().optional(),
     tier: z.enum(['free', 'paid']),
     summary: z.string(),
     cover: z.string().optional(),

@@ -9,12 +9,14 @@ export const prerender = false;
 const allPosts = await getCollection('travel');
 
 const posts = allPosts.sort((a, b) => {
-  return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+  const bTime = new Date(b.data.publishedAt ?? b.data.date).getTime();
+  const aTime = new Date(a.data.publishedAt ?? a.data.date).getTime();
+  return bTime - aTime;
 });
 
-const latestPosts = posts.slice(0, 6);
-
 const featuredPost = posts.find((post) => post.data.slug === siteConfig.featuredPostSlug) ?? posts[0];
+
+const latestPosts = posts.filter((post) => post.data.slug !== featuredPost.data.slug).slice(0, 6);
 
 const countriesMap = new Map();
 
@@ -76,18 +78,18 @@ type AnimalId = typeof zodiacAnimals[number]['id'];
 type CollectionCounts = Record<AnimalId, Record<SignName, number>>;
 
 const collectionCounts: CollectionCounts = {
-  rat:    { 白羊: 2, 金牛: 0, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 1, 摩羯: 0, 水瓶: 0, 双鱼: 0 },
-  ox:     { 白羊: 0, 金牛: 1, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 0, 双鱼: 2 },
-  tiger:  { 白羊: 0, 金牛: 0, 双子: 2, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 1, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 1, 双鱼: 0 },
-  rabbit: { 白羊: 0, 金牛: 1, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 1, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 1, 水瓶: 0, 双鱼: 0 },
-  dragon: { 白羊: 1, 金牛: 0, 双子: 0, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 1, 射手: 1, 摩羯: 0, 水瓶: 0, 双鱼: 0 },
-  snake:  { 白羊: 0, 金牛: 0, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 1, 天秤: 0, 天蝎: 1, 射手: 0, 摩羯: 0, 水瓶: 0, 双鱼: 1 },
-  horse:  { 白羊: 0, 金牛: 0, 双子: 1, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 1, 双鱼: 0 },
-  goat:   { 白羊: 0, 金牛: 1, 双子: 0, 巨蟹: 0, 狮子: 0, 处女: 1, 天秤: 0, 天蝎: 1, 射手: 0, 摩羯: 0, 水瓶: 0, 双鱼: 1 },
-  monkey: { 白羊: 1, 金牛: 0, 双子: 0, 巨蟹: 0, 狮子: 1, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 1, 摩羯: 0, 水瓶: 0, 双鱼: 0 },
-  rooster:{ 白羊: 0, 金牛: 0, 双子: 0, 巨蟹: 1, 狮子: 0, 处女: 0, 天秤: 1, 天蝎: 0, 射手: 0, 摩羯: 1, 水瓶: 0, 双鱼: 1 },
-  dog:    { 白羊: 0, 金牛: 0, 双子: 1, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 0, 双鱼: 2 },
-  pig:    { 白羊: 0, 金牛: 1, 双子: 0, 巨蟹: 0, 狮子: 0, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 0, 水瓶: 1, 双鱼: 1 },
+  rat: { 白羊: 4, 金牛: 4, 双子: 5, 巨蟹: 10, 狮子: 7, 处女: 0, 天秤: 5, 天蝎: 0, 射手: 3, 摩羯: 5, 水瓶: 7, 双鱼: 4 },
+  ox: { 白羊: 3, 金牛: 0, 双子: 6, 巨蟹: 10, 狮子: 2, 处女: 0, 天秤: 0, 天蝎: 0, 射手: 0, 摩羯: 5, 水瓶: 4, 双鱼: 8 },
+  tiger: { 白羊: 4, 金牛: 4, 双子: 2, 巨蟹: 5, 狮子: 4, 处女: 4, 天秤: 0, 天蝎: 5, 射手: 5, 摩羯: 9, 水瓶: 7, 双鱼: 6 },
+  rabbit: { 白羊: 7, 金牛: 0, 双子: 6, 巨蟹: 7, 狮子: 6, 处女: 4, 天秤: 8, 天蝎: 6, 射手: 8, 摩羯: 7, 水瓶: 3, 双鱼: 7 },
+  dragon: { 白羊: 6, 金牛: 5, 双子: 4, 巨蟹: 8, 狮子: 0, 处女: 6, 天秤: 0, 天蝎: 6, 射手: 5, 摩羯: 0, 水瓶: 6, 双鱼: 7 },
+  snake: { 白羊: 0, 金牛: 7, 双子: 3, 巨蟹: 6, 狮子: 5, 处女: 7, 天秤: 0, 天蝎: 0, 射手: 4, 摩羯: 6, 水瓶: 2, 双鱼: 8 },
+  horse: { 白羊: 3, 金牛: 9, 双子: 5, 巨蟹: 0, 狮子: 7, 处女: 2, 天秤: 0, 天蝎: 4, 射手: 13, 摩羯: 7, 水瓶: 0, 双鱼: 6 },
+  goat: { 白羊: 8, 金牛: 5, 双子: 7, 巨蟹: 7, 狮子: 4, 处女: 6, 天秤: 0, 天蝎: 8, 射手: 0, 摩羯: 10, 水瓶: 7, 双鱼: 8 },
+  monkey: { 白羊: 8, 金牛: 9, 双子: 8, 巨蟹: 4, 狮子: 5, 处女: 0, 天秤: 9, 天蝎: 6, 射手: 4, 摩羯: 5, 水瓶: 5, 双鱼: 5 },
+  rooster: { 白羊: 8, 金牛: 0, 双子: 7, 巨蟹: 4, 狮子: 9, 处女: 7, 天秤: 0, 天蝎: 6, 射手: 0, 摩羯: 2, 水瓶: 4, 双鱼: 5 },
+  dog: { 白羊: 7, 金牛: 4, 双子: 4, 巨蟹: 8, 狮子: 5, 处女: 8, 天秤: 6, 天蝎: 4, 射手: 3, 摩羯: 7, 水瓶: 0, 双鱼: 0 },
+  pig: { 白羊: 8, 金牛: 8, 双子: 3, 巨蟹: 9, 狮子: 8, 处女: 8, 天秤: 8, 天蝎: 0, 射手: 5, 摩羯: 0, 水瓶: 5, 双鱼: 0 },
 };
 
 const formatCount2 = (num: number) => String(num).padStart(2, '0');
@@ -120,6 +122,7 @@ const collectionBoard = zodiacAnimals.map((animal) => {
 const totalCollectionCount = zodiacAnimals.length * zodiacSigns.length;
 const unlockedCollectionCount = collectionBoard.reduce((sum, item) => sum + item.unlockedKinds, 0);
 const collectionProgress = Math.round((unlockedCollectionCount / totalCollectionCount) * 100);
+const totalCollectionEntries = collectionBoard.reduce((sum, item) => sum + item.totalCount, 0);
 
 const formatMonth = (value: string | Date) => {
   const date = new Date(value);
@@ -1547,7 +1550,8 @@ const formatMonth = (value: string | Date) => {
           </div>
 
           <div class="collection-summary">
-            <strong>{unlockedCollectionCount} / {totalCollectionCount}</strong>
+            <strong>{unlockedCollectionCount} / {totalCollectionCount} · {formatCount2(totalCollectionEntries)}</strong>
+            <!-- <span>总数量 · {formatCount2(totalCollectionEntries)}</span> -->
             <span>当前解锁进度 · {collectionProgress}%</span>
             <div class="collection-progress" aria-hidden="true">
               <div
